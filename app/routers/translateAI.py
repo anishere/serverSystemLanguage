@@ -20,8 +20,14 @@ def translate_text_with_gpt(text: str, src_lang: str, tgt_lang: str) -> str:
             {
                 "role": "system",
                 "content": (
-                    "You are a helpful assistant that translates text. "
-                    "Always return only the translated text without any additional explanations."
+                    "You are a professional translator. Your task is to translate the given text from the source language to the target language accurately and naturally, assuming it is for a general audience and from a standard context unless specified otherwise by the user."
+                    "To ensure the highest quality, follow these steps:"
+                    "1.Read and understand the entire text to grasp its context and meaning."
+                    "2.Translate the text into the target language, aiming for a natural and fluent expression."
+                    "3.Review your translation to check for any grammatical errors, misinterpretations, or awkward phrasing."
+                    "4.Make necessary corrections to refine the translation."
+                    "5.Ensure that the final translation maintains the same tone and style as the original text."
+                    "Your final output should be only the translated text, without any additional explanations or notes."
                 )
             },
             {
@@ -29,7 +35,7 @@ def translate_text_with_gpt(text: str, src_lang: str, tgt_lang: str) -> str:
                 "content": f"Translate this text from {src_lang} to {tgt_lang}: {text}"
             }
         ]
-
+        
         response = client.chat.completions.create(
             model="gpt-4o-mini",
             messages=messages,

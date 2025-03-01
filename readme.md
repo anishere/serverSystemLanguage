@@ -20,12 +20,25 @@ pip install torch torchvision torchaudio --index-url https://download.pytorch.or
 nvcc --version
 nvidia-smi
 
+warning whisper
+D:\LuanVan\api_base_public-main\venv\lib\site-packages\whisper\_\_init\_\_.py
+
+checkpoint = torch.load(fp, map_location=device)
+
+checkpoint = torch.load(fp, map_location=device, weights_only=True)
+
 # Cấu hình CORS
 
-app.add_middleware(
+app.add*middleware(
 CORSMiddleware,
-allow_origins=["*"], # Cho phép mọi nguồn (có thể thay "_" bằng một danh sách các domain cụ thể)
-allow_credentials=True,
-allow_methods=["_"], # Cho phép tất cả các phương thức HTTP (GET, POST, ...)
+allow_origins=["*"], # Cho phép mọi nguồn (có thể thay "*" bằng một danh sách các domain cụ thể)
+allow*credentials=True,
+allow_methods=["*"], # Cho phép tất cả các phương thức HTTP (GET, POST, ...)
 allow_headers=["*"], # Cho phép tất cả các header
 )
+
+pip install pytesseract
+
+pip install easyocr opencv-python pillow
+
+pip install torch torchvision segment-anything
