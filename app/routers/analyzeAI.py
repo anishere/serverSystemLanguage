@@ -50,7 +50,7 @@ router = APIRouter(prefix="/analyzeAI", tags=["analyzeAI"])
 
 # Khai báo các biến cấu hình
 MAX_CHUNK_SIZE = 300  # Độ dài tối đa của một chunk
-MAX_CONCURRENT_REQUESTS = 5  # Số lượng request đồng thời tối đa
+MAX_CONCURRENT_REQUESTS = 10  # Số lượng request đồng thời tối đa
 CACHE_TIMEOUT = 3600  # Thời gian cache kết quả (giây)
 TEMPERATURE = 0.2  # Nhiệt độ cho API GPT (giảm để có kết quả chính xác hơn)
 MODEL = "gpt-4o-mini"  # Model GPT sử dụng
@@ -327,97 +327,6 @@ def get_enhanced_prompt() -> str:
         "{\"name\": \"English\", \"code\": \"en\", \"text\": \", my name is David\"}]\n\n"
     )
 
-def analyze_word_by_word(text: str) -> List[Dict[str, Any]]:
-    """
-    Phân tích văn bản từng từ một cho các đoạn có sự thay đổi ngôn ngữ đột ngột.
-    """
-    words = simple_tokenize(text)
-    results = []
-    
-    current_language = None
-    current_text = ""
-    
-    for word in words:
-        # Bỏ qua khoảng trắng
-        if not word.strip():
-            # Thêm khoảng trắng vào đoạn hiện tại
-            if current_text:
-                current_text += word
-            continue
-        
-        # Phát hiện ngôn ngữ cho từ hiện tại
-        lang_result = detect_language(word)
-        
-        if not lang_result:
-            # Không thể xác định ngôn ngữ, thêm vào đoạn hiện tại
-            current_text += word
-            continue
-        
-        detected_language = lang_result[0]
-        
-        # Nếu đây là từ đầu tiên hoặc ngôn ngữ thay đổi
-        if current_language is None or detected_language.code != current_language["code"]:
-            # Lưu đoạn hiện tại nếu có
-            if current_text:
-                results.append({
-                    "name": current_language["name"],
-                    "code": current_language["code"],
-                    "text": current_text.strip()
-                })
-            
-            # Bắt đầu đoạn mới
-            current_language = {
-                "name": detected_language.language,
-                "code": detected_language.code
-            }
-            current_text = word
-        else:
-            # Tiếp tục với đoạn hiện tại
-            current_text += word
-    
-    # Thêm đoạn cuối cùng
-    if current_text and current_language:
-        results.append({
-            "name": current_language["name"],
-            "code": current_language["code"],
-            "text": current_text.strip()
-        })
-    
-    return results
-
-def get_language_transitions(text: str) -> List[int]:
-    """
-    Phát hiện các vị trí có khả năng chuyển đổi ngôn ngữ cao.
-    Trả về danh sách các chỉ số trong văn bản nơi có thể xảy ra chuyển đổi.
-    """
-    transitions = []
-    words = simple_tokenize(text)
-    
-    current_position = 0
-    last_language = None
-    
-    for word in words:
-        # Bỏ qua khoảng trắng và dấu câu
-        if not word.strip() or not re.search(r'\w', word):
-            current_position += len(word)
-            continue
-            
-        # Phát hiện ngôn ngữ của từ hiện tại
-        lang_result = detect_language(word)
-        
-        if lang_result:
-            current_language = lang_result[0].code
-            
-            # Kiểm tra xem có sự chuyển đổi ngôn ngữ không
-            if last_language is not None and current_language != last_language:
-                transitions.append(current_position)
-                
-            last_language = current_language
-        
-        current_position += len(word)
-    
-    return transitions
-
 def adaptive_chunking(text: str) -> List[Dict[str, Any]]:
     """
     Phân đoạn thích ứng dựa trên độ phức tạp ngôn ngữ của văn bản.
@@ -593,28 +502,4 @@ async def analyze(request: AnalyzeRequest, background_tasks: BackgroundTasks, ap
         return AnalyzeResponse(language=language_fragments)
 
     except RuntimeError as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-# Thêm các endpoint cho phân tích theo từng từ
-
-@router.post("/analyze/word-level")
-async def analyze_word_level(request: AnalyzeRequest, api_key: str = get_api_key):
-    """
-    API phân tích ở mức độ từng từ, đặc biệt hữu ích cho văn bản có thay đổi ngôn ngữ đột ngột.
-    """
-    if not request.text:
-        raise HTTPException(status_code=400, detail="Text is required")
-
-    try:
-        # Phân tích từng từ
-        fragments = analyze_word_by_word(request.text)
-        
-        # Chuyển đổi kết quả thành dạng trả về của API
-        language_fragments = [
-            LanguageFragment(name=lang["name"], code=lang["code"], text=lang["text"])
-            for lang in fragments
-        ]
-        
-        return AnalyzeResponse(language=language_fragments)
-    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

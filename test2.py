@@ -1,179 +1,196 @@
+#!/usr/bin/env python3
+import os
+import sys
+import base64
+import json
 import cv2
-import pytesseract
-import numpy as np
-from PIL import Image, ImageDraw, ImageFont
 import openai
-import torch
-import concurrent.futures
-from segment_anything import SamPredictor, sam_model_registry
 
-# 🔹 Cấu hình OpenAI API (>1.0)
-client = openai.OpenAI(api_key="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")
+# Cấu hình client OpenAI từ biến môi trường
+client = openai.OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+if not client.api_key:
+    print("Vui lòng thiết lập biến môi trường OPENAI_API_KEY.")
+    sys.exit(1)
 
-# 🔹 Cấu hình đường dẫn Tesseract
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+def adjust_image_size(image, min_width=100, min_height=100):
+    """
+    Điều chỉnh kích thước ảnh sao cho ảnh có ít nhất min_width x min_height.
+    Nếu ảnh nhỏ hơn, sẽ phóng to theo tỉ lệ.
+    """
+    h, w = image.shape[:2]
+    new_w = max(w, min_width)
+    new_h = max(h, min_height)
+    if new_w != w or new_h != h:
+        resized = cv2.resize(image, (new_w, new_h), interpolation=cv2.INTER_LINEAR)
+        return resized
+    return image
 
-# 🔹 Load mô hình SAM để tách nền văn bản
-sam_checkpoint = "sam_vit_h_4b8939.pth"
-sam = sam_model_registry["vit_h"](checkpoint=sam_checkpoint)
-predictor = SamPredictor(sam)
-sam.to("cuda" if torch.cuda.is_available() else "cpu")
+def encode_cv2_image(image) -> str:
+    """
+    Mã hóa ảnh (numpy array) sang chuỗi base64 sau khi chuyển đổi thành JPEG.
+    """
+    try:
+        success, buffer = cv2.imencode(".jpg", image)
+        if not success:
+            raise RuntimeError("Không thể mã hóa ảnh sang định dạng JPEG.")
+        return base64.b64encode(buffer).decode("utf-8")
+    except Exception as e:
+        raise RuntimeError(f"Error encoding cv2 image: {e}")
 
-# 🔹 Tiền xử lý ảnh để tăng độ chính xác OCR
-def preprocess_image(image_path):
-    image = cv2.imread(image_path)
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-    processed = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                      cv2.THRESH_BINARY, 31, 10)
-    kernel = np.ones((1,1), np.uint8)
-    processed = cv2.morphologyEx(processed, cv2.MORPH_CLOSE, kernel)
-    return processed
-
-# 🔹 Tách chữ bằng mô hình SAM
-def segment_text(image_path):
-    image = cv2.imread(image_path)
-    predictor.set_image(image)
-    masks, _, _ = predictor.predict()
-    return masks
-
-# 🔹 Nhận diện văn bản & vị trí bounding box từ ảnh
-def extract_text_with_boxes(image_path):
-    image = preprocess_image(image_path)
-    data = pytesseract.image_to_data(image, lang="vie+eng", output_type=pytesseract.Output.DICT)
-
-    text_boxes = []
-    for i in range(len(data["text"])):
-        if int(data["conf"][i]) > 60:  # Chỉ lấy văn bản có độ tin cậy cao
-            x, y, w, h = data["left"][i], data["top"][i], data["width"][i], data["height"][i]
-            text_boxes.append({"text": data["text"][i], "bbox": (x, y, x + w, y + h)})
-
-    return text_boxes
-
-# 🔹 Dịch văn bản bằng OpenAI GPT-4o Mini (Chạy đa luồng)
-def translate_text(text, target_language="Vietnamese"):
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "You are a helpful assistant that translates text. "
-                    "Always return only the translated text without any additional explanations."
-                )
-            },
+def extract_text_from_image(image_base64: str) -> str:
+    """
+    Trích xuất văn bản và vị trí (bounding box) của từng khối văn bản từ ảnh bằng GPT‑4o‑mini.
+    
+    Prompt yêu cầu:
+      - Trích xuất tất cả văn bản từ ảnh kèm theo vị trí chính xác của từng khối văn bản.
+      - Trả về kết quả dưới dạng JSON array, mỗi phần tử chứa 'text' và 'bounding_box'
+        (định dạng: [x, y, width, height]).
+      - Không cung cấp thêm bất kỳ bình luận hay giải thích nào.
+      - Ảnh được cung cấp dưới dạng data URL, đã được điều chỉnh sao cho rõ ràng (ít nhất 100x100 pixels).
+    """
+    try:
+        messages = [
             {
                 "role": "user",
-                "content": f"Translate this text from Auto to {target_language}: {text}"
+                "content": [
+                    {
+                        "type": "text",
+                        "text": (
+                            "Extract all the text from the image along with the most precise and accurate location of each text block. "
+                            "For each text block, return the text and its bounding box coordinates (x, y, width, height) "
+                            "in a JSON array. Do not provide any extra commentary or explanation. "
+                            "The image provided is a clear, high-resolution image (at least 100x100 pixels)."
+                        )
+                    },
+                    {
+                        "type": "image_url",
+                        "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}
+                    }
+                ]
             }
-        ],
-        max_tokens=100
-    )
-    return response.choices[0].message.content.strip()
+        ]
+        
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=1000
+        )
+        return response.choices[0].message.content
+    except Exception as e:
+        raise RuntimeError(f"Error during text extraction: {e}")
 
-# 🔹 Dịch toàn bộ văn bản bằng Đa Luồng (Tăng số luồng)
-def translate_text_bulk(text_list, target_language="Vietnamese"):
-    translated_texts = []
+def translate_text(text: str) -> str:
+    """
+    Dịch văn bản sử dụng GPT‑4o‑mini.
     
-    with concurrent.futures.ThreadPoolExecutor(max_workers=10) as executor:  # Tăng số luồng để dịch nhanh hơn
-        future_to_text = {executor.submit(translate_text, text, target_language): text for text in text_list}
-        for future in concurrent.futures.as_completed(future_to_text):
-            try:
-                translated_texts.append(future.result())
-            except Exception as e:
-                translated_texts.append("")  # Nếu lỗi, trả về chuỗi rỗng
+    Prompt yêu cầu: Dịch văn bản được cung cấp sang tiếng Anh, trả về kết quả chỉ chứa văn bản dịch.
+    """
+    try:
+        messages = [
+            {
+                "role": "user",
+                "content": (
+                    f"Translate the following text into English: \"{text}\". "
+                    "Return only the translated text without any extra commentary."
+                )
+            }
+        ]
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=messages,
+            max_tokens=100
+        )
+        return response.choices[0].message.content.strip()
+    except Exception as e:
+        raise RuntimeError(f"Error during text translation: {e}")
 
-    return translated_texts
-
-# 🔹 Mở rộng kích thước ảnh nếu văn bản dịch dài hơn nhiều
-def expand_image_if_needed(img, text_boxes, translated_texts, font_path="arial.ttf"):
-    img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    draw = ImageDraw.Draw(img_pil)
-    font = ImageFont.truetype(font_path, 30)  # Giữ nguyên kích thước chữ
-
-    max_width = img_pil.width
-    expand_needed = False
-
-    for box, translated_text in zip(text_boxes, translated_texts):
-        x_min, y_min, x_max, y_max = box["bbox"]
-        text_width, _ = draw.textbbox((0, 0), translated_text, font=font)[2:4]
-
-        if text_width > (x_max - x_min):
-            expand_needed = True
-            max_width = max(max_width, x_min + text_width + 10)
-
-    if expand_needed:
-        new_img = Image.new("RGB", (max_width, img_pil.height), "white")
-        new_img.paste(img_pil, (0, 0))
-        img = cv2.cvtColor(np.array(new_img), cv2.COLOR_RGB2BGR)
-        return img
-    return img
-
-# 🔹 Đè văn bản dịch lên ảnh gốc
-# 🔹 Đè văn bản dịch lên ảnh gốc
-# 🔹 Tính toán font size tự động để tránh chữ đè lên nhau
-def get_optimal_fontsize(text, bbox_width, bbox_height, font_path="arial.ttf"):
-    """ Điều chỉnh kích thước font để vừa với bounding box """
-    font_size = bbox_height  # Bắt đầu bằng kích thước bbox
-    font = ImageFont.truetype(font_path, font_size)
-
-    while font.getbbox(text)[2] > bbox_width and font_size > 10:
-        font_size -= 1
-        font = ImageFont.truetype(font_path, font_size)
-
-    return font
-
-
-# 🔹 Đè văn bản dịch lên ảnh gốc
-def overlay_translated_text(image_path, output_path, target_language="Vietnamese"):
-    text_boxes = extract_text_with_boxes(image_path)
+def overlay_translations(image, text_blocks):
+    """
+    Với từng khối văn bản (có 'text' và 'bounding_box'), dịch văn bản đó và overlay
+    văn bản dịch lên vùng ảnh tương ứng.
     
-    # Lấy toàn bộ văn bản cần dịch
-    original_texts = [box["text"] for box in text_boxes]
-    
-    # Sử dụng đa luồng để dịch nhanh hơn
-    translated_texts = translate_text_bulk(original_texts, target_language)
-    
-    # Đọc ảnh bằng OpenCV và chuyển sang Pillow để xử lý text overlay
-    img = cv2.imread(image_path)
+    - Che đi vùng văn bản gốc bằng hình chữ nhật màu trắng.
+    - Overlay văn bản dịch lên chính vị trí đó.
+    """
+    font = cv2.FONT_HERSHEY_SIMPLEX
+    font_scale = 0.7
+    thickness = 2
+    text_color = (0, 0, 0)  # màu đen
 
-    # Kiểm tra xem có cần mở rộng ảnh không
-    img = expand_image_if_needed(img, text_boxes, translated_texts)
+    for block in text_blocks:
+        orig_text = block.get("text", "")
+        bbox = block.get("bounding_box", {})
+        if not isinstance(bbox, dict) or not all(k in bbox for k in ["x", "y", "width", "height"]):
+            continue
+        x = bbox["x"]
+        y = bbox["y"]
+        w = bbox["width"]
+        h = bbox["height"]
+        
+        # Dịch văn bản gốc
+        translated = translate_text(orig_text)
+        
+        # Che khu vực văn bản gốc (vẽ hình chữ nhật màu trắng)
+        cv2.rectangle(image, (x, y), (x + w, y + h), (255, 255, 255), -1)
+        
+        # Tính toán vị trí để overlay văn bản (căn giữa vùng bounding box)
+        text_size, _ = cv2.getTextSize(translated, font, font_scale, thickness)
+        text_width, text_height = text_size
+        text_x = x + (w - text_width) // 2
+        text_y = y + (h + text_height) // 2
+        cv2.putText(image, translated, (text_x, text_y), font, font_scale, text_color, thickness, cv2.LINE_AA)
+    return image
 
-    img_pil = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-    draw = ImageDraw.Draw(img_pil)
-    font_path = "arial.ttf"
+def clean_extraction_result(result: str) -> str:
+    """
+    Loại bỏ các ký tự markdown (```json và ``` ở đầu, cuối) nếu có.
+    """
+    cleaned = result.strip()
+    if cleaned.startswith("```json"):
+        cleaned = cleaned[len("```json"):].strip()
+    if cleaned.endswith("```"):
+        cleaned = cleaned[:-3].strip()
+    return cleaned
 
-    # Sử dụng mô hình SAM để tách nền chữ cũ
-    masks = segment_text(image_path)
-    for mask in masks:
-        resized_mask = cv2.resize(mask.astype(np.uint8) * 255, (img.shape[1], img.shape[0]), interpolation=cv2.INTER_NEAREST)
-        img[resized_mask > 0] = 255  # Làm trắng nền tại vị trí có chữ
+def main():
+    if len(sys.argv) < 2:
+        print("Usage: python img_to_text.py <image_file>")
+        sys.exit(1)
+    image_file = sys.argv[1]
+    try:
+        # Đọc ảnh gốc
+        image = cv2.imread(image_file)
+        if image is None:
+            raise RuntimeError("Cannot read the image from the provided path.")
+        
+        # Điều chỉnh kích thước ảnh nếu cần (ít nhất 100x100 pixels)
+        image = adjust_image_size(image, min_width=100, min_height=100)
+        
+        # Mã hóa ảnh đã điều chỉnh sang chuỗi base64
+        image_base64 = encode_cv2_image(image)
+        
+        # Trích xuất văn bản và bounding box từ ảnh (kết quả là chuỗi JSON)
+        extraction_result = extract_text_from_image(image_base64)
+        print("Extraction result:")
+        print(extraction_result)
+        
+        cleaned_result = clean_extraction_result(extraction_result)
+        
+        try:
+            text_blocks = json.loads(cleaned_result)
+            if not isinstance(text_blocks, list):
+                raise ValueError("The JSON result is not an array.")
+        except Exception as e:
+            raise RuntimeError(f"Error parsing extraction result: {e}")
+        
+        # Overlay văn bản dịch lên ảnh dựa trên bounding box
+        output_image = overlay_translations(image, text_blocks)
+        output_path = "translated_output.jpg"
+        cv2.imwrite(output_path, output_image)
+        print(f"Output image saved as: {output_path}")
+    except RuntimeError as e:
+        print(e)
+        sys.exit(1)
 
-    # Đè văn bản dịch lên ảnh với font size tự động điều chỉnh
-    for box, translated_text in zip(text_boxes, translated_texts):
-        x_min, y_min, x_max, y_max = box["bbox"]
-        bbox_width = x_max - x_min
-        bbox_height = y_max - y_min
-
-        print(f"Original: {box['text']} -> Translated: {translated_text}")
-
-        # Lấy font size phù hợp
-        font = get_optimal_fontsize(translated_text, bbox_width, bbox_height, font_path)
-
-        # Vẽ nền trắng trước khi vẽ chữ mới
-        draw.rectangle([x_min, y_min, x_max, y_max], fill="white")
-
-        # Vẽ văn bản dịch
-        draw.text((x_min, y_min), translated_text, font=font, fill="black")
-
-    # Lưu ảnh cuối cùng
-    final_img = cv2.cvtColor(np.array(img_pil), cv2.COLOR_RGB2BGR)
-    cv2.imwrite(output_path, final_img)
-    print(f"✅ Ảnh đã được lưu tại: {output_path}")
-
-# 🔹 Chạy thử nghiệm
 if __name__ == "__main__":
-    input_image = "C:/Users/acer/Pictures/Screenshots/Screenshot 2025-01-26 105248.png"
-    output_image = "translated_overlay_sam.png"
-
-    overlay_translated_text(input_image, output_image, "Vietnamese")
+    main()

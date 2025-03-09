@@ -42,3 +42,8 @@ pip install pytesseract
 pip install easyocr opencv-python pillow
 
 pip install torch torchvision segment-anything
+
+tenserflow
+keras
+
+<!-- paddle gpu -->
