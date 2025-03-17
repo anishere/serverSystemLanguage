@@ -1,0 +1,581 @@
+{
+  "language": "en",
+  "gpt_extracted_text": "**EduPath**\n\n**Time spent on smartphones and tablets, by category**\n\n**Smartphones**  \nother, 5%  \nnews, 3%  \nmusic and videos, 8%  \nutilities, 20%  \nsocial networking, 29%  \ngames, 35%  \n\n**Tablets**  \nother, 8%  \nnews, 4%  \nmusic and videos, 13%  \nutilities, 3%  \nsocial networking, 15%  \ngames, 57%",
+  "results": [
+    {
+      "bbox": [
+        [
+          36.0,
+          10.0
+        ],
+        [
+          97.0,
+          10.0
+        ],
+        [
+          97.0,
+          30.0
+        ],
+        [
+          36.0,
+          30.0
+        ]
+      ],
+      "text_original": "EduPath",
+      "text_corrected": "EduPath",
+      "confidence": 0.9962459802627563
+    },
+    {
+      "bbox": [
+        [
+          32.0,
+          47.0
+        ],
+        [
+          735.0,
+          49.0
+        ],
+        [
+          735.0,
+          75.0
+        ],
+        [
+          32.0,
+          73.0
+        ]
+      ],
+      "text_original": "Time spent on smartphones and tablets, by category",
+      "text_corrected": "Time spent on smartphones and tablets, by category",
+      "confidence": 0.9556484222412109
+    },
+    {
+      "bbox": [
+        [
+          88.0,
+          88.0
+        ],
+        [
+          266.0,
+          88.0
+        ],
+        [
+          266.0,
+          115.0
+        ],
+        [
+          88.0,
+          115.0
+        ]
+      ],
+      "text_original": "Smartphones",
+      "text_corrected": "Smartphones",
+      "confidence": 0.9987372756004333
+    },
+    {
+      "bbox": [
+        [
+          510.0,
+          86.0
+        ],
+        [
+          611.0,
+          86.0
+        ],
+        [
+          611.0,
+          114.0
+        ],
+        [
+          510.0,
+          114.0
+        ]
+      ],
+      "text_original": "Tablets",
+      "text_corrected": "Tablets",
+      "confidence": 0.9978898167610168
+    },
+    {
+      "bbox": [
+        [
+          132.0,
+          123.0
+        ],
+        [
+          232.0,
+          123.0
+        ],
+        [
+          232.0,
+          147.0
+        ],
+        [
+          132.0,
+          147.0
+        ]
+      ],
+      "text_original": "other, 5%",
+      "text_corrected": "other, 5%",
+      "confidence": 0.9954039454460144
+    },
+    {
+      "bbox": [
+        [
+          511.0,
+          142.0
+        ],
+        [
+          611.0,
+          142.0
+        ],
+        [
+          611.0,
+          163.0
+        ],
+        [
+          511.0,
+          163.0
+        ]
+      ],
+      "text_original": "other,8%",
+      "text_corrected": "other, 8%",
+      "confidence": 0.9215349555015564
+    },
+    {
+      "bbox": [
+        [
+          653.0,
+          134.0
+        ],
+        [
+          772.0,
+          132.0
+        ],
+        [
+          772.0,
+          156.0
+        ],
+        [
+          653.0,
+          158.0
+        ]
+      ],
+      "text_original": "utilities, 3%",
+      "text_corrected": "utilities, 20%",
+      "confidence": 0.9523279666900635
+    },
+    {
+      "bbox": [
+        [
+          242.0,
+          153.0
+        ],
+        [
+          339.0,
+          153.0
+        ],
+        [
+          339.0,
+          173.0
+        ],
+        [
+          242.0,
+          173.0
+        ]
+      ],
+      "text_original": "news,3%",
+      "text_corrected": "news, 3%",
+      "confidence": 0.9710591435432434
+    },
+    {
+      "bbox": [
+        [
+          20.0,
+          192.0
+        ],
+        [
+          92.0,
+          190.0
+        ],
+        [
+          93.0,
+          211.0
+        ],
+        [
+          21.0,
+          214.0
+        ]
+      ],
+      "text_original": "games,",
+      "text_corrected": "games, 35%",
+      "confidence": 0.9885368347167969
+    },
+    {
+      "bbox": [
+        [
+          248.0,
+          200.0
+        ],
+        [
+          356.0,
+          198.0
+        ],
+        [
+          356.0,
+          219.0
+        ],
+        [
+          248.0,
+          222.0
+        ]
+      ],
+      "text_original": "music and",
+      "text_corrected": "music and videos, 8%",
+      "confidence": 0.9748657941818237
+    },
+    {
+      "bbox": [
+        [
+          672.0,
+          199.0
+        ],
+        [
+          771.0,
+          196.0
+        ],
+        [
+          771.0,
+          216.0
+        ],
+        [
+          672.0,
+          220.0
+        ]
+      ],
+      "text_original": "news,4%",
+      "text_corrected": "news, 4%",
+      "confidence": 0.9570727348327637
+    },
+    {
+      "bbox": [
+        [
+          20.0,
+          212.0
+        ],
+        [
+          70.0,
+          212.0
+        ],
+        [
+          70.0,
+          237.0
+        ],
+        [
+          20.0,
+          237.0
+        ]
+      ],
+      "text_original": "35%",
+      "text_corrected": "35%",
+      "confidence": 0.9993322491645813
+    },
+    {
+      "bbox": [
+        [
+          267.0,
+          224.0
+        ],
+        [
+          379.0,
+          224.0
+        ],
+        [
+          379.0,
+          245.0
+        ],
+        [
+          267.0,
+          245.0
+        ]
+      ],
+      "text_original": "videos,8%",
+      "text_corrected": "videos, 8%",
+      "confidence": 0.9116122126579285
+    },
+    {
+      "bbox": [
+        [
+          680.0,
+          264.0
+        ],
+        [
+          787.0,
+          264.0
+        ],
+        [
+          787.0,
+          284.0
+        ],
+        [
+          680.0,
+          284.0
+        ]
+      ],
+      "text_original": "music and",
+      "text_corrected": "music and videos, 13%",
+      "confidence": 0.9691363573074341
+    },
+    {
+      "bbox": [
+        [
+          685.0,
+          284.0
+        ],
+        [
+          762.0,
+          287.0
+        ],
+        [
+          761.0,
+          312.0
+        ],
+        [
+          684.0,
+          308.0
+        ]
+      ],
+      "text_original": "videos,",
+      "text_corrected": "videos,",
+      "confidence": 0.9949451684951782
+    },
+    {
+      "bbox": [
+        [
+          296.0,
+          313.0
+        ],
+        [
+          378.0,
+          317.0
+        ],
+        [
+          377.0,
+          341.0
+        ],
+        [
+          295.0,
+          338.0
+        ]
+      ],
+      "text_original": "utilities,",
+      "text_corrected": "utilities, 3%",
+      "confidence": 0.9904753565788269
+    },
+    {
+      "bbox": [
+        [
+          685.0,
+          309.0
+        ],
+        [
+          734.0,
+          309.0
+        ],
+        [
+          734.0,
+          334.0
+        ],
+        [
+          685.0,
+          334.0
+        ]
+      ],
+      "text_original": "13%",
+      "text_corrected": "13%",
+      "confidence": 0.9983541965484619
+    },
+    {
+      "bbox": [
+        [
+          289.0,
+          339.0
+        ],
+        [
+          340.0,
+          339.0
+        ],
+        [
+          340.0,
+          364.0
+        ],
+        [
+          289.0,
+          364.0
+        ]
+      ],
+      "text_original": "20%",
+      "text_corrected": "20%",
+      "confidence": 0.9996338486671448
+    },
+    {
+      "bbox": [
+        [
+          408.0,
+          417.0
+        ],
+        [
+          485.0,
+          414.0
+        ],
+        [
+          485.0,
+          436.0
+        ],
+        [
+          408.0,
+          438.0
+        ]
+      ],
+      "text_original": "games,",
+      "text_corrected": "games, 57%",
+      "confidence": 0.995391845703125
+    },
+    {
+      "bbox": [
+        [
+          638.0,
+          410.0
+        ],
+        [
+          703.0,
+          410.0
+        ],
+        [
+          703.0,
+          434.0
+        ],
+        [
+          638.0,
+          434.0
+        ]
+      ],
+      "text_original": "social",
+      "text_corrected": "social networking, 29%",
+      "confidence": 0.9987452626228333
+    },
+    {
+      "bbox": [
+        [
+          445.0,
+          435.0
+        ],
+        [
+          496.0,
+          435.0
+        ],
+        [
+          496.0,
+          461.0
+        ],
+        [
+          445.0,
+          461.0
+        ]
+      ],
+      "text_original": "57%",
+      "text_corrected": "57%",
+      "confidence": 0.9986003041267395
+    },
+    {
+      "bbox": [
+        [
+          638.0,
+          433.0
+        ],
+        [
+          761.0,
+          436.0
+        ],
+        [
+          761.0,
+          461.0
+        ],
+        [
+          638.0,
+          457.0
+        ]
+      ],
+      "text_original": "networking,",
+      "text_corrected": "networking,",
+      "confidence": 0.993994951248169
+    },
+    {
+      "bbox": [
+        [
+          75.0,
+          447.0
+        ],
+        [
+          258.0,
+          447.0
+        ],
+        [
+          258.0,
+          467.0
+        ],
+        [
+          75.0,
+          467.0
+        ]
+      ],
+      "text_original": "social networking,",
+      "text_corrected": "social networking, 15%",
+      "confidence": 0.946354329586029
+    },
+    {
+      "bbox": [
+        [
+          71.0,
+          467.0
+        ],
+        [
+          122.0,
+          467.0
+        ],
+        [
+          122.0,
+          493.0
+        ],
+        [
+          71.0,
+          493.0
+        ]
+      ],
+      "text_original": "29%",
+      "text_corrected": "29%",
+      "confidence": 0.9989032745361328
+    },
+    {
+      "bbox": [
+        [
+          640.0,
+          460.0
+        ],
+        [
+          688.0,
+          460.0
+        ],
+        [
+          688.0,
+          482.0
+        ],
+        [
+          640.0,
+          482.0
+        ]
+      ],
+      "text_original": "15%",
+      "text_corrected": "15%",
+      "confidence": 0.999396800994873
+    }
+  ]
+}

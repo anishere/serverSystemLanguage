@@ -1,0 +1,282 @@
+{
+  "language": "vi",
+  "gpt_extracted_text": "Here is the extracted text from the image in Vietnamese:\n\n```\nCÔNG TY CỔ PHẦN\nGỐM SỨ CHU ĐẦU HẢI DƯƠNG\nCHU DẦU HẢI DƯƠNG PORCELAIN CERAMIC JOINT STOCK COMPANY\n\nĐịa chỉ: Thôn Chu Đậu, Xã Thái Tân, Huyện Nam Sách, Tỉnh Hải Dương\nĐiện thoại: (84-3) 203541898  •  Fax: (84-3) 203541989\nEmail: suchudauhaiduong@gmail.com  •  Website: suchudau.com.vn\n```",
+  "results": [
+    {
+      "bbox": [
+        [
+          86.0,
+          65.0
+        ],
+        [
+          198.0,
+          65.0
+        ],
+        [
+          198.0,
+          92.0
+        ],
+        [
+          86.0,
+          92.0
+        ]
+      ],
+      "text_original": "OLUTION",
+      "text_corrected": "CÔNG TY CỔ PHẦN",
+      "confidence": 0.9877375364303589
+    },
+    {
+      "bbox": [
+        [
+          87.0,
+          90.0
+        ],
+        [
+          193.0,
+          90.0
+        ],
+        [
+          193.0,
+          103.0
+        ],
+        [
+          87.0,
+          103.0
+        ]
+      ],
+      "text_original": "Advettising&Interior",
+      "text_corrected": "GỐM SỨ CHU ĐẦU HẢI DƯƠNG",
+      "confidence": 0.894100546836853
+    },
+    {
+      "bbox": [
+        [
+          394.0,
+          222.0
+        ],
+        [
+          683.0,
+          188.0
+        ],
+        [
+          687.0,
+          218.0
+        ],
+        [
+          398.0,
+          251.0
+        ]
+      ],
+      "text_original": "CONG TY CO PHAN",
+      "text_corrected": "CÔNG TY CỔ PHẦN",
+      "confidence": 0.9162847995758057
+    },
+    {
+      "bbox": [
+        [
+          311.0,
+          267.0
+        ],
+        [
+          776.0,
+          217.0
+        ],
+        [
+          779.0,
+          243.0
+        ],
+        [
+          314.0,
+          292.0
+        ]
+      ],
+      "text_original": "GóM SUCHU DAU HAI DUONG",
+      "text_corrected": "GỐM SỨ CHU ĐẦU HẢI DƯƠNG",
+      "confidence": 0.9470005035400391
+    },
+    {
+      "bbox": [
+        [
+          105.0,
+          308.0
+        ],
+        [
+          205.0,
+          304.0
+        ],
+        [
+          207.0,
+          356.0
+        ],
+        [
+          107.0,
+          360.0
+        ]
+      ],
+      "text_original": "DRU",
+      "text_corrected": "(84-3) 203541898",
+      "confidence": 0.5665959715843201
+    },
+    {
+      "bbox": [
+        [
+          308.0,
+          301.0
+        ],
+        [
+          780.0,
+          251.0
+        ],
+        [
+          781.0,
+          267.0
+        ],
+        [
+          310.0,
+          318.0
+        ]
+      ],
+      "text_original": "CHU DAU HAI DUONG PORCELAIN CERAMIC JOINT STOCK COMPANY",
+      "text_corrected": "CHU ĐẦU HẢI DƯƠNG PORCELAIN CERAMIC JOINT STOCK COMPANY",
+      "confidence": 0.954458475112915
+    },
+    {
+      "bbox": [
+        [
+          367.0,
+          330.0
+        ],
+        [
+          716.0,
+          296.0
+        ],
+        [
+          718.0,
+          313.0
+        ],
+        [
+          369.0,
+          347.0
+        ]
+      ],
+      "text_original": "Dja chiThon Chu uXa Thai Tan Huyn Nam SachTinh Hai Duong",
+      "text_corrected": "Địa chỉ: Thôn Chu Đậu, Xã Thái Tân, Huyện Nam Sách, Tỉnh Hải Dương",
+      "confidence": 0.8302525281906128
+    },
+    {
+      "bbox": [
+        [
+          391.0,
+          346.0
+        ],
+        [
+          686.0,
+          318.0
+        ],
+        [
+          687.0,
+          333.0
+        ],
+        [
+          393.0,
+          362.0
+        ]
+      ],
+      "text_original": "Din thopi84-3203541898Fax84-3203541989",
+      "text_corrected": "Điện thoại: (84-3) 203541898 • Fax: (84-3) 203541989",
+      "confidence": 0.9402030110359192
+    },
+    {
+      "bbox": [
+        [
+          100.0,
+          368.0
+        ],
+        [
+          209.0,
+          357.0
+        ],
+        [
+          211.0,
+          374.0
+        ],
+        [
+          101.0,
+          384.0
+        ]
+      ],
+      "text_original": "CHU DAU CJSC",
+      "text_corrected": "CHU ĐẦU HẢI DƯƠNG CJSC",
+      "confidence": 0.902685821056366
+    },
+    {
+      "bbox": [
+        [
+          361.0,
+          365.0
+        ],
+        [
+          723.0,
+          331.0
+        ],
+        [
+          724.0,
+          348.0
+        ],
+        [
+          363.0,
+          382.0
+        ]
+      ],
+      "text_original": "Email: suchudauhaiduong@gmail.comWebsite:suchudau.com.vn",
+      "text_corrected": "Email: suchudauhaiduong@gmail.com • Website: suchudau.com.vn",
+      "confidence": 0.9704756736755371
+    },
+    {
+      "bbox": [
+        [
+          98.0,
+          381.0
+        ],
+        [
+          210.0,
+          371.0
+        ],
+        [
+          211.0,
+          383.0
+        ],
+        [
+          99.0,
+          394.0
+        ]
+      ],
+      "text_original": "HAIDUONG.VICT NAM",
+      "text_corrected": "HẢI DƯƠNG, VIỆT NAM",
+      "confidence": 0.9034099578857422
+    },
+    {
+      "bbox": [
+        [
+          330.0,
+          672.0
+        ],
+        [
+          581.0,
+          672.0
+        ],
+        [
+          581.0,
+          691.0
+        ],
+        [
+          330.0,
+          691.0
+        ]
+      ],
+      "text_original": "www.solution.com.vn",
+      "text_corrected": "www.suchudau.com.vn",
+      "confidence": 0.9934598803520203
+    }
+  ]
+}

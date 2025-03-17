@@ -1,0 +1,357 @@
+==================================================
+ DANH SÁCH BOUNDING BOX VÀ VĂN BẢN ĐÃ CHỈNH SỬA 
+==================================================
+
+VĂN BẢN TRÍCH XUẤT BỞI GPT-4O-MINI:
+--------------------------------------------------
+Here is the extracted text from the image:
+
+---
+
+**Creative Intelligence**
+
+- **Ideas**
+  - Associations quickly
+  - Identifies patterns
+  - High-capacity
+  - Doodles and draws
+  - Uses game play to learn
+  - Inspiring videos and more
+  - Thinks of 6 new ideas before breakfast
+  - Tells stories
+  - Listens well
+  - Writing skills
+  - Daydreamer
+  - Mind maps often
+
+- **Case notes**
+  - Richard Branson
+  - The Beatles
+  - Kendrick Lamar
+  - Parents
+  - Ryan Reynolds
+
+- **Applications**
+  - Friendships
+  - Cooking
+  - Sports
+  - Gardening
+  - Parenting
+  - Counseling
+  - Problem-solving across all academic disciplines
+
+- **Originality**
+  - High energy directed
+  - Concentrated on passions
+
+- **Flexibility**
+  - Viewpoints are different
+  - Relies on all senses to make decisions
+  - Rarely dogmatic
+  - Highly intuitive
+
+- **Note-taking**
+  - Doodles
+  - Color-coding
+  - Uses humor
+
+- **Characteristics**
+  - Links concepts to new ideas
+  - Loves to visualize
+  - Appreciates beauty and art
+  - Emotionally responsive
+  - Highly self-expressive
+
+- **Expansion**
+  - Loves to learn
+  - Dynamic
+  - Self-taught
+  - Builds new ideas, from existing ideas
+
+--- 
+
+Let me know if you need anything else!
+
+--------------------------------------------------
+
+Bounding box 1:
+  Tọa độ: (72,86) (164,86) (164,101) (72,101)
+  Văn bản gốc (PaddleOCR): Associations quickly
+  Văn bản đã sửa: Associations quickly
+
+Bounding box 2:
+  Tọa độ: (682,93) (784,93) (784,108) (682,108)
+  Văn bản gốc (PaddleOCR): High energy directed
+  Văn bản đã sửa: High energy directed
+
+Bounding box 3:
+  Tọa độ: (81,109) (163,109) (163,121) (81,121)
+  Văn bản gốc (PaddleOCR): Identifies patterns
+  Văn bản đã sửa: Identifies patterns
+
+Bounding box 4:
+  Tọa độ: (597,104) (662,104) (662,116) (597,116)
+  Văn bản gốc (PaddleOCR): Originality
+  Văn bản đã sửa: Originality
+
+Bounding box 5:
+  Tọa độ: (682,113) (805,114) (805,126) (682,125)
+  Văn bản gốc (PaddleOCR): Concentrated on passions
+  Văn bản đã sửa: Concentrated on passions
+
+Bounding box 6:
+  Tọa độ: (98,131) (163,131) (163,143) (98,143)
+  Văn bản gốc (PaddleOCR): High-capacity
+  Văn bản đã sửa: High-capacity
+
+Bounding box 7:
+  Tọa độ: (274,143) (389,143) (389,154) (274,154)
+  Văn bản gốc (PaddleOCR): Brain, the favorite muscle
+  Văn bản đã sửa: Doodles and draws
+
+Bounding box 8:
+  Tọa độ: (278,184) (382,185) (382,197) (278,196)
+  Văn bản gốc (PaddleOCR): Thinks of 6 new ideas.
+  Văn bản đã sửa: Thinks of 6 new ideas before breakfast
+
+Bounding box 9:
+  Tọa độ: (442,188) (478,192) (476,208) (441,204)
+  Văn bản gốc (PaddleOCR): Ideas
+  Văn bản đã sửa: Ideas
+
+Bounding box 10:
+  Tọa độ: (840,181) (952,181) (952,192) (840,192)
+  Văn bản gốc (PaddleOCR): Viewpoints are different
+  Văn bản đã sửa: Viewpoints are different
+
+Bounding box 11:
+  Tọa độ: (73,193) (162,194) (162,206) (73,205)
+  Văn bản gốc (PaddleOCR): Doodles and draws
+  Văn bản đã sửa: Doodles and draws
+
+Bounding box 12:
+  Tọa độ: (304,198) (382,198) (382,210) (304,210)
+  Văn bản gốc (PaddleOCR): before breakfast
+  Văn bản đã sửa: before breakfast
+
+Bounding box 13:
+  Tọa độ: (742,207) (805,210) (805,225) (741,223)
+  Văn bản gốc (PaddleOCR): Flexibility
+  Văn bản đã sửa: Flexibility
+
+Bounding box 14:
+  Tọa độ: (848,201) (1019,201) (1019,212) (848,212)
+  Văn bản gốc (PaddleOCR): Relies on all senses to make decisions.
+  Văn bản đã sửa: Relies on all senses to make decisions
+
+Bounding box 15:
+  Tọa độ: (52,215) (163,215) (163,230) (52,230)
+  Văn bản gốc (PaddleOCR): Uses game play to learn
+  Văn bản đã sửa: Uses game play to learn
+
+Bounding box 16:
+  Tọa độ: (845,221) (923,221) (923,233) (845,233)
+  Văn bản gốc (PaddleOCR): Rarely dogmatic
+  Văn bản đã sửa: Rarely dogmatic
+
+Bounding box 17:
+  Tọa độ: (44,238) (161,238) (161,249) (44,249)
+  Văn bản gốc (PaddleOCR): Inspiring videos and more
+  Văn bản đã sửa: Inspiring videos and more
+
+Bounding box 18:
+  Tọa độ: (840,238) (911,238) (911,251) (840,251)
+  Văn bản gốc (PaddleOCR): Highly intuitive
+  Văn bản đã sửa: Highly intuitive
+
+Bounding box 19:
+  Tọa độ: (107,273) (162,274) (162,286) (107,285)
+  Văn bản gốc (PaddleOCR): Tells stories
+  Văn bản đã sửa: Tells stories
+
+Bounding box 20:
+  Tọa độ: (107,296) (163,296) (163,308) (107,308)
+  Văn bản gốc (PaddleOCR): Listens well
+  Văn bản đã sửa: Listens well
+
+Bounding box 21:
+  Tọa độ: (98,315) (163,317) (162,333) (98,330)
+  Văn bản gốc (PaddleOCR): Writing skills
+  Văn bản đã sửa: Writing skills
+
+Bounding box 22:
+  Tọa độ: (102,337) (162,339) (161,355) (101,352)
+  Văn bản gốc (PaddleOCR): Daydreamer
+  Văn bản đã sửa: Daydreamer
+
+Bounding box 23:
+  Tọa độ: (254,332) (332,335) (332,347) (254,345)
+  Văn bản gốc (PaddleOCR): Richard Branson
+  Văn bản đã sửa: Richard Branson
+
+Bounding box 24:
+  Tọa độ: (273,351) (329,351) (329,364) (273,364)
+  Văn bản gốc (PaddleOCR): The Beatles
+  Văn bản đã sửa: The Beatles
+
+Bounding box 25:
+  Tọa độ: (576,349) (684,352) (684,375) (575,372)
+  Văn bản gốc (PaddleOCR): Creative
+  Văn bản đã sửa: Creative
+
+Bounding box 26:
+  Tọa độ: (912,349) (955,352) (954,364) (912,361)
+  Văn bản gốc (PaddleOCR): Doodles
+  Văn bản đã sửa: Doodles
+
+Bounding box 27:
+  Tọa độ: (81,361) (160,361) (160,373) (81,373)
+  Văn bản gốc (PaddleOCR): Mind maps often
+  Văn bản đã sửa: Mind maps often
+
+Bounding box 28:
+  Tọa độ: (390,361) (425,364) (424,379) (389,377)
+  Văn bản gốc (PaddleOCR): Case
+  Văn bản đã sửa: Case notes
+
+Bounding box 29:
+  Tọa độ: (254,374) (328,374) (328,385) (254,385)
+  Văn bản gốc (PaddleOCR): Kendrick Lamar
+  Văn bản đã sửa: Kendrick Lamar
+
+Bounding box 30:
+  Tọa độ: (833,377) (877,379) (876,395) (832,392)
+  Văn bản gốc (PaddleOCR): taking
+  Văn bản đã sửa: Parents
+
+Bounding box 31:
+  Tọa độ: (914,369) (980,372) (980,384) (914,381)
+  Văn bản gốc (PaddleOCR): Color-coding
+  Văn bản đã sửa: Ryan Reynolds
+
+Bounding box 32:
+  Tọa độ: (390,380) (427,380) (427,392) (390,392)
+  Văn bản gốc (PaddleOCR): notes
+  Văn bản đã sửa: Friendships
+
+Bounding box 33:
+  Tọa độ: (556,379) (705,383) (705,406) (555,402)
+  Văn bản gốc (PaddleOCR): Intelligence
+  Văn bản đã sửa: Cooking
+
+Bounding box 34:
+  Tọa độ: (289,390) (327,393) (326,408) (288,406)
+  Văn bản gốc (PaddleOCR): Parents
+  Văn bản đã sửa: Sports
+
+Bounding box 35:
+  Tọa độ: (913,392) (971,392) (971,405) (913,405)
+  Văn bản gốc (PaddleOCR): Uses humor
+  Văn bản đã sửa: Gardening
+
+Bounding box 36:
+  Tọa độ: (266,414) (336,414) (336,425) (266,425)
+  Văn bản gốc (PaddleOCR): Ryan Reynolds
+  Văn bản đã sửa: Parenting
+
+Bounding box 37:
+  Tọa độ: (340,495) (395,497) (395,509) (340,508)
+  Văn bản gốc (PaddleOCR): Friendships
+  Văn bản đã sửa: Counseling
+
+Bounding box 38:
+  Tọa độ: (343,512) (387,515) (387,527) (342,524)
+  Văn bản gốc (PaddleOCR): Cooking
+  Văn bản đã sửa: Problem-solving across all academic disciplines
+
+Bounding box 39:
+  Tọa độ: (870,503) (996,503) (996,511) (870,511)
+  Văn bản gốc (PaddleOCR): Links concepts to new ideas.
+  Văn bản đã sửa: Links concepts to new ideas
+
+Bounding box 40:
+  Tọa độ: (873,520) (957,520) (957,531) (873,531)
+  Văn bản gốc (PaddleOCR): Loves to visualize
+  Văn bản đã sửa: Loves to visualize
+
+Bounding box 41:
+  Tọa độ: (345,534) (380,534) (380,547) (345,547)
+  Văn bản gốc (PaddleOCR): Sports
+  Văn bản đã sửa: Appreciates beauty and art
+
+Bounding box 42:
+  Tọa độ: (747,537) (842,539) (841,551) (747,549)
+  Văn bản gốc (PaddleOCR): Characteristics
+  Văn bản đã sửa: Emotionally responsive
+
+Bounding box 43:
+  Tọa độ: (878,539) (1001,539) (1001,550) (878,550)
+  Văn bản gốc (PaddleOCR): Appreciates beauty and art.
+  Văn bản đã sửa: Highly self-expressive
+
+Bounding box 44:
+  Tọa độ: (324,553) (374,553) (374,565) (324,565)
+  Văn bản gốc (PaddleOCR): Gardening
+  Văn bản đã sửa: Loves to learn
+
+Bounding box 45:
+  Tọa độ: (429,554) (508,554) (508,567) (429,567)
+  Văn bản gốc (PaddleOCR): Applications
+  Văn bản đã sửa: Dynamic
+
+Bounding box 46:
+  Tọa độ: (875,557) (981,558) (981,570) (874,569)
+  Văn bản gốc (PaddleOCR): Emotionally responsive
+  Văn bản đã sửa: Self-taught
+
+Bounding box 47:
+  Tọa độ: (331,572) (389,572) (389,584) (331,584)
+  Văn bản gốc (PaddleOCR): Parenting
+  Văn bản đã sửa: Expansion
+
+Bounding box 48:
+  Tọa độ: (866,574) (970,575) (970,588) (866,586)
+  Văn bản gốc (PaddleOCR): Highly self-expressive
+  Văn bản đã sửa: Builds new ideas, from existing ideas
+
+Bounding box 49:
+  Tọa độ: (332,589) (398,590) (398,602) (332,601)
+  Văn bản gốc (PaddleOCR): Counseling
+  Văn bản đã sửa: Note-taking
+
+Bounding box 50:
+  Tọa độ: (180,608) (394,608) (394,619) (180,619)
+  Văn bản gốc (PaddleOCR): Problem-solving across all academic disciplines
+  Văn bản đã sửa: Color-coding
+
+Bounding box 51:
+  Tọa độ: (496,656) (563,656) (563,667) (496,667)
+  Văn bản gốc (PaddleOCR): Loves to learn
+  Văn bản đã sửa: Uses humor
+
+Bounding box 52:
+  Tọa độ: (514,676) (557,676) (557,688) (514,688)
+  Văn bản gốc (PaddleOCR): Dynamic
+  Văn bản đã sửa: Characteristics
+
+Bounding box 53:
+  Tọa độ: (501,694) (558,696) (557,712) (500,709)
+  Văn bản gốc (PaddleOCR): Self-taught
+  Văn bản đã sửa: Applications
+
+Bounding box 54:
+  Tọa độ: (597,685) (668,689) (667,705) (596,702)
+  Văn bản gốc (PaddleOCR): Expansion
+  Văn bản đã sửa: Creative Intelligence
+
+Bounding box 55:
+  Tọa độ: (395,715) (562,716) (562,728) (395,727)
+  Văn bản gốc (PaddleOCR): Builds new ideas, from existing ideas.
+  Văn bản đã sửa: Ideas
+
+Bounding box 56:
+  Tọa độ: (604,706) (615,716) (606,726) (595,715)
+  Văn bản gốc (PaddleOCR): .
+  Văn bản đã sửa: .
+
+==================================================
