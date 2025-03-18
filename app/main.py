@@ -5,7 +5,6 @@ from app.routers import analyzeAI
 from app.routers import speechToTextAI
 from app.routers import textToSpeech
 from app.routers import imgToText
-from app.routers import imgToTextTranslate
 from fastapi.middleware.cors import CORSMiddleware
 
 # Tạo instance của FastAPI
@@ -28,7 +27,7 @@ app.include_router(analyzeAI.router)
 app.include_router(speechToTextAI.router)
 app.include_router(textToSpeech.router)
 app.include_router(imgToText.router)
-app.include_router(imgToTextTranslate.router)
+# app.include_router(imgToTextTranslate.router)
 
 # @app.route("/favicon.ico") lỗi khi khởi chạy
 # def favicon():

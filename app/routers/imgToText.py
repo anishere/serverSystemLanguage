@@ -1,16 +1,20 @@
-# routers/imgToText.py
 from fastapi import APIRouter, HTTPException, UploadFile, File
 from app.models.imgToText import ImgToTextResponse
 from app.config import settings
-import openai
 import base64
 from app.security.security import get_api_key
+from chatbot.services.img_to_text_agent import ImgToTextAgent
+import logging
 
-# Cấu hình client OpenAI
-client = openai.OpenAI(api_key=settings.OPENAI_API_KEY)
+# Thiết lập logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Tạo instance router
 router = APIRouter(prefix="/imgToText", tags=["imgToText"])
+
+# Khởi tạo ImgToTextAgent một lần
+img_to_text_agent = ImgToTextAgent()
 
 def encode_image(file: UploadFile) -> str:
     """
@@ -21,31 +25,6 @@ def encode_image(file: UploadFile) -> str:
         return base64.b64encode(image_bytes).decode("utf-8")
     except Exception as e:
         raise RuntimeError(f"Error encoding image: {e}")
-
-def extract_text_from_image(image_base64: str) -> str:
-    """
-    Trích xuất văn bản từ hình ảnh bằng OpenAI GPT-4o Mini.
-    """
-    try:
-        messages = [
-            {
-                "role": "user",
-                "content": [
-                    {"type": "text", "text": "Extract text from the image and don't provide any extra answer."},
-                    {"type": "image_url", "image_url": {"url": f"data:image/jpeg;base64,{image_base64}"}}
-                ]
-            }
-        ]
-
-        response = client.chat.completions.create(
-            model="gpt-4o-mini",
-            max_tokens=1000,
-            messages=messages
-        )
-
-        return response.choices[0].message.content
-    except Exception as e:
-        raise RuntimeError(f"Error during text extraction: {e}")
 
 @router.post("/extract", response_model=ImgToTextResponse)
 async def extract_text(file: UploadFile = File(...), api_key: str = get_api_key):
@@ -58,10 +37,30 @@ async def extract_text(file: UploadFile = File(...), api_key: str = get_api_key)
     try:
         # Chuyển đổi file ảnh sang base64
         image_base64 = encode_image(file)
-
-        # Trích xuất văn bản từ hình ảnh
-        extracted_text = extract_text_from_image(image_base64)
-
+        
+        # Reset file cursor để có thể đọc lại nếu cần
+        file.file.seek(0)
+        
+        # Đóng gói thông tin trích xuất vào câu hỏi theo format "EXTRACT|image_base64"
+        formatted_question = f"EXTRACT|{image_base64}"
+        logger.info(f"Processing image extraction. Image size: {len(image_base64)} bytes")
+        
+        # Gọi ImgToTextAgent với câu hỏi đã định dạng
+        result = img_to_text_agent.get_workflow().compile().invoke(
+            input={
+                "question": formatted_question,
+                "generation": "",
+                "documents": []
+            }
+        )
+        
+        extracted_text = result["generation"]
+        logger.info(f"Text extraction completed. Result length: {len(extracted_text)}")
+        
         return ImgToTextResponse(extracted_text=extracted_text)
     except RuntimeError as e:
+        logger.error(f"Runtime error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+    except Exception as e:
+        logger.error(f"Unexpected error: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")

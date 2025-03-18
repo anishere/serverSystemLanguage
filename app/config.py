@@ -14,6 +14,13 @@ class Settings:
     API_KEY = os.environ["API_KEY"]
     OPENAI_API_KEY = os.environ["OPENAI_API_KEY"]
 
-
+    # chat bot
+    KEY_API_GPT = os.environ["OPENAI_API_KEY"]
+    
+    NUM_DOC = os.environ["NUM_DOC"]
+    
+    LLM_NAME = os.environ["NUM_DOC"]
+    
+    OPENAI_LLM = os.environ["OPENAI_LLM"]
 
 settings = Settings()
