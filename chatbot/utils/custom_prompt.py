@@ -14,7 +14,7 @@ class CustomPrompt:
         4. Make necessary refinements focusing on cohesion devices specific to the target language (English connectives, Japanese particles, Chinese measure words, etc.).
         5. Ensure the final translation maintains the original text's tone while conforming to language-specific academic or professional conventions.
         
-        Your final output should be only the translated text, without any additional explanations or notes.
+        Your response must consist exclusively of the translated text, with no additional explanations, notes, or commentary included.
     """
 
     MULTILINGUAL_ANALYSIS_PROMPT = """
