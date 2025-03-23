@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.database.connection import get_db
-from app.database.auth_api import (
+from app.database.api.users_api import (
     register_user, login_user, update_profile, change_password, 
     change_account_type, update_active_status, delete_user,
     reset_password, get_all_users, add_user_credits, subtract_user_credits

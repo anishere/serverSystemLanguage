@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 from app.database.connection import get_db
-from app.database.models import User
+from app.database.models import CreditTransaction, TransactionType, User
 from fastapi import Depends, HTTPException, status
 from passlib.context import CryptContext
 from datetime import datetime

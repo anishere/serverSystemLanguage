@@ -7,11 +7,14 @@ from app.routers import textToSpeech
 from app.routers import imgToText
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routers import auth
-from app.database import models
+from app.database.router import users
+from app.database import create_tables
 from app.database.connection import engine
+from app.database.router.translation import router as translation_history_router
+from app.database.router.credits import router as credit_transactions_router
 
-models.Base.metadata.create_all(bind=engine)
+# Tạo bảng nếu chưa tồn tại
+create_tables()
 
 # Tạo instance của FastAPI
 app = FastAPI()
@@ -35,7 +38,10 @@ app.include_router(textToSpeech.router)
 app.include_router(imgToText.router)
 # app.include_router(imgToTextTranslate.router)
 
-app.include_router(auth.router)
+app.include_router(users.router)
+
+app.include_router(translation_history_router)
+app.include_router(credit_transactions_router)
 
 # @app.route("/favicon.ico") lỗi khi khởi chạy
 # def favicon():
