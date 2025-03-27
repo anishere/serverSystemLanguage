@@ -3,7 +3,7 @@ from app.database.connection import get_db
 from app.database.api.users_api import (
     register_user, login_user, update_profile, change_password, 
     change_account_type, update_active_status, delete_user,
-    reset_password, get_all_users, add_user_credits, subtract_user_credits
+    reset_password, get_all_users, add_user_credits, subtract_user_credits, get_current_user
 )
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
@@ -152,3 +152,20 @@ def subtract_credits_endpoint(
     Trả về thông tin số dư hiện tại của người dùng sau khi trừ.
     """
     return subtract_user_credits(db, user_id, credit_data.amount)
+
+# Endpoint lấy thông tin người dùng hiện tại
+@router.get("/me/{user_id}", summary="Lấy thông tin người dùng hiện tại")
+def get_current_user_endpoint(
+    user_id: int,
+    db: Session = Depends(get_db),
+    api_key: str = get_api_key
+):
+    """
+    Lấy thông tin chi tiết của người dùng hiện tại dựa trên user_id.
+    
+    - **user_id**: ID của người dùng cần lấy thông tin
+    
+    Trả về thông tin người dùng bao gồm: username, email, credits, account_type, v.v.
+    Không bao gồm mật khẩu.
+    """
+    return get_current_user(db, user_id)

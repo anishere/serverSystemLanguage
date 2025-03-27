@@ -1,18 +1,20 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from payos import PayOS, ItemData, PaymentData
 import time
+import os
 
-# Thông tin cấu hình payOS (thay bằng thông tin thực tế của bạn)
-CLIENT_ID = "10ae0dea-8ca9-4a15-9c74-b70e0f4eb9d5"
-API_KEY = "2b484d72-3bd5-4f3b-8a24-18c2137d64ce"
-CHECKSUM_KEY = "b524d8725158190bbd9d447687500a1e1c2f2a3547bd0783e60a19252e2076a4"
+# Lấy thông tin cấu hình từ biến môi trường
+PAYOS_CLIENT_ID = os.getenv("PAYOS_CLIENT_ID", "")
+PAYOS_API_KEY = os.getenv("PAYOS_API_KEY", "")
+PAYOS_CHECKSUM_KEY = os.getenv("PAYOS_CHECKSUM_KEY", "")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "")
 
 # Khởi tạo đối tượng PayOS
-payos = PayOS(client_id=CLIENT_ID, api_key=API_KEY, checksum_key=CHECKSUM_KEY)
+payos = PayOS(client_id=PAYOS_CLIENT_ID, api_key=PAYOS_API_KEY, checksum_key=PAYOS_CHECKSUM_KEY)
 
-# Khởi tạo FastAPI
-app = FastAPI()
+# Khởi tạo APIRouter
+router = APIRouter(prefix="/payments", tags=["payments"])
 
 # Định nghĩa model cho input của /create-payment
 class PaymentRequest(BaseModel):
@@ -35,7 +37,7 @@ class PaymentStatusResponse(BaseModel):
     message: str
 
 # Endpoint tạo liên kết thanh toán
-@app.post("/create-payment", response_model=PaymentResponse)
+@router.post("/create-payment", response_model=PaymentResponse)
 async def create_payment(payment: PaymentRequest):
     try:
         # Tạo orderCode dựa trên timestamp (đảm bảo hợp lệ)
@@ -50,8 +52,8 @@ async def create_payment(payment: PaymentRequest):
             amount=payment.amount,
             description=payment.description,
             items=[item],
-            cancelUrl="http://localhost:8000/cancel",
-            returnUrl="http://localhost:8000/success"
+            cancelUrl=f"{FRONTEND_URL}/payment/fail",
+            returnUrl=f"{FRONTEND_URL}/payment/success"
         )
 
         # Gọi API payOS để tạo link thanh toán
@@ -65,7 +67,7 @@ async def create_payment(payment: PaymentRequest):
         raise HTTPException(status_code=500, detail=f"Lỗi khi tạo liên kết thanh toán: {str(e)}")
 
 # Endpoint kiểm tra trạng thái thanh toán
-@app.post("/check-payment", response_model=PaymentStatusResponse)
+@router.post("/check-payment", response_model=PaymentStatusResponse)
 async def check_payment(status_request: PaymentStatusRequest):
     try:
         # Kiểm tra trạng thái thanh toán từ payOS
@@ -81,8 +83,3 @@ async def check_payment(status_request: PaymentStatusRequest):
             return PaymentStatusResponse(success=False, message="Thanh toán đang chờ xử lý")
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Lỗi khi kiểm tra trạng thái: {str(e)}")
-
-# Chạy thử với uvicorn (nếu chạy local)
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="127.0.0.1", port=8000)

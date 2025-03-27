@@ -199,3 +199,25 @@ def subtract_user_credits(db: Session, user_id: int, amount: int):
         "user_id": user.user_id,
         "username": user.username
     }
+
+# Logic lấy thông tin người dùng hiện tại
+def get_current_user(db: Session, user_id: int):
+    """
+    Lấy thông tin chi tiết của người dùng hiện tại dựa trên user_id.
+    """
+    user = db.query(User).filter(User.user_id == user_id).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Người dùng không tồn tại")
+    
+    # Trả về thông tin người dùng (không bao gồm mật khẩu)
+    return {
+        "user_id": user.user_id,
+        "username": user.username,
+        "email": user.email,
+        "created_at": user.created_at,
+        "updated_at": user.updated_at,
+        "last_login": user.last_login,
+        "is_active": user.is_active,
+        "credits": user.credits,
+        "account_type": user.account_type
+    }
