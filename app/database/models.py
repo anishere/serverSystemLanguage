@@ -54,3 +54,18 @@ class TranslationHistory(Base):
     
     # Relationship
     user = relationship("User", back_populates="translations")
+
+# Thêm model Config
+class Config(Base):
+    __tablename__ = "config"
+
+    id = Column(Integer, primary_key=True, index=True, autoincrement=True)
+    name_web = Column(String(255), nullable=False, comment="Tên của website")
+    address_web = Column(String(255), nullable=False, comment="Địa chỉ URL của website")
+    logo_link = Column(Text, nullable=False, comment="Chuỗi base64 của ảnh logo")  # Thay đổi từ String(255) sang Text
+    api_key = Column(String(100), nullable=False, comment="Khóa API cho các dịch vụ tích hợp")
+    name_owner = Column(String(100), nullable=False, comment="Tên chủ sở hữu website")
+    phone_1 = Column(String(20), nullable=False, comment="Số điện thoại liên hệ 1")
+    phone_2 = Column(String(20), nullable=True, comment="Số điện thoại liên hệ 2 (không bắt buộc)")
+    google_map_link = Column(String(255), nullable=True, comment="Link Google Maps tới địa chỉ")
+    price = Column(Integer, nullable=False, comment="Giá trị (ví dụ: giá dịch vụ, sản phẩm)")

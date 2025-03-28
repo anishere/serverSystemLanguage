@@ -12,6 +12,7 @@ from app.database import create_tables
 from app.database.connection import engine
 from app.database.router.translation import router as translation_history_router
 from app.database.router.credits import router as credit_transactions_router
+from app.database.router.config import router as config_router
 
 from app.routers.payment import router as payment_router
 
@@ -46,6 +47,8 @@ app.include_router(translation_history_router)
 app.include_router(credit_transactions_router)
 
 app.include_router(payment_router) 
+
+app.include_router(config_router)
 
 # @app.route("/favicon.ico") lỗi khi khởi chạy
 # def favicon():
