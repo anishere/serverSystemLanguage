@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.database.connection import get_db
-from app.database.api.credit_api import save_credit_transaction, get_credit_transactions, get_revenue_credit_transactions
+from app.database.api.credit_api import save_credit_transaction, get_credit_transactions, get_revenue_credit_transactions, get_all_credit_transactions
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from app.security.security import get_api_key
@@ -104,4 +104,41 @@ def get_revenue_transactions_endpoint(
         start_date=start_date,
         end_date=end_date,
         sort_by_date=sort_by_date
+    )
+
+@router.get("/all", summary="Lấy tất cả giao dịch credits trong hệ thống")
+def get_all_transactions_endpoint(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=1000),
+    sort_order: str = Query("desc", regex="^(asc|desc)$"),
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    transaction_type: Optional[str] = Query(None, regex="^(purchase|usage|all)$"),
+    db: Session = Depends(get_db),
+    api_key: str = get_api_key
+):
+    """
+    Lấy tất cả giao dịch credits trong hệ thống.
+    
+    - **skip**: Số bản ghi bỏ qua (phân trang)
+    - **limit**: Số bản ghi trả về tối đa (phân trang)
+    - **sort_order**: Thứ tự sắp xếp ("asc" hoặc "desc")
+    - **start_date**: Ngày bắt đầu (định dạng ISO)
+    - **end_date**: Ngày kết thúc (định dạng ISO)
+    - **transaction_type**: Loại giao dịch (purchase, usage, all)
+    """
+    
+    # Xử lý trường hợp transaction_type = 'all'
+    if transaction_type == 'all':
+        transaction_type = None
+    
+    # Lấy tất cả giao dịch
+    return get_all_credit_transactions(
+        db=db,
+        skip=skip,
+        limit=limit,
+        sort_order=sort_order,
+        start_date=start_date,
+        end_date=end_date,
+        transaction_type=transaction_type
     )

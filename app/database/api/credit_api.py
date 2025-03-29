@@ -162,3 +162,78 @@ def get_revenue_credit_transactions(
         "offset": skip,
         "items": transaction_list
     }
+
+def get_all_credit_transactions(
+    db: Session,
+    skip: int = 0,
+    limit: int = 10,
+    sort_order: str = "desc",
+    start_date: datetime = None,
+    end_date: datetime = None,
+    transaction_type: str = None
+):
+    """
+    Lấy tất cả giao dịch credits trong hệ thống với nhiều tùy chọn lọc
+    """
+    # Truy vấn tất cả giao dịch, không lọc theo user_id
+    query = db.query(CreditTransaction)
+    
+    # Lọc theo ngày nếu có
+    if start_date:
+        query = query.filter(CreditTransaction.created_at >= start_date)
+    if end_date:
+        query = query.filter(CreditTransaction.created_at <= end_date)
+    
+    # Lọc theo loại giao dịch nếu có
+    if transaction_type:
+        if transaction_type.lower() == "purchase":
+            query = query.filter(CreditTransaction.transaction_type == TransactionType.purchase)
+        elif transaction_type.lower() == "usage":
+            query = query.filter(CreditTransaction.transaction_type == TransactionType.usage)
+    
+    # Đếm tổng số bản ghi
+    total_count = query.count()
+    
+    # Tính tổng số tiền theo loại giao dịch
+    total_purchase = db.query(func.sum(CreditTransaction.amount)).filter(
+        CreditTransaction.transaction_type == TransactionType.purchase
+    ).scalar() or 0
+    
+    total_usage = db.query(func.sum(CreditTransaction.amount)).filter(
+        CreditTransaction.transaction_type == TransactionType.usage
+    ).scalar() or 0
+    
+    # Sắp xếp theo thời gian
+    if sort_order.lower() == "asc":
+        query = query.order_by(CreditTransaction.created_at.asc())
+    else:
+        query = query.order_by(CreditTransaction.created_at.desc())
+    
+    # Áp dụng phân trang
+    results = query.offset(skip).limit(limit).all()
+    
+    # Chuẩn bị dữ liệu trả về
+    transaction_list = []
+    for item in results:
+        # Truy vấn thông tin người dùng
+        user = db.query(User).filter(User.user_id == item.user_id).first()
+        username = user.username if user else None
+        
+        transaction_list.append({
+            "id": item.id,
+            "user_id": item.user_id,
+            "username": username,
+            "amount": float(item.amount),
+            "transaction_type": item.transaction_type.value,
+            "created_at": item.created_at.isoformat(),
+            "payment_method": item.payment_method
+        })
+    
+    return {
+        "total": total_count,
+        "total_purchase": float(total_purchase),
+        "total_usage": float(total_usage),
+        "limit": limit,
+        "offset": skip,
+        "items": transaction_list
+    }
