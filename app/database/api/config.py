@@ -22,7 +22,9 @@ def get_config(db: Session):
         "phone_1": config.phone_1,
         "phone_2": config.phone_2,
         "google_map_link": config.google_map_link,
-        "price": config.price
+        "price": config.price,
+        "address": config.address,
+        "email": config.email
     }
 
     return config_data

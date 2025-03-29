@@ -21,7 +21,9 @@ class ConfigUpdate(BaseModel):
     phone_1: Optional[str] = None
     phone_2: Optional[str] = None
     google_map_link: Optional[str] = None
-    price: Optional[int] = None 
+    price: Optional[int] = None
+    address: Optional[str] = None
+    email: Optional[str] = None
 
 @router.get("/")
 def get_config(db: Session = Depends(get_db)):

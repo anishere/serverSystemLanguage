@@ -69,3 +69,5 @@ class Config(Base):
     phone_2 = Column(String(20), nullable=True, comment="Số điện thoại liên hệ 2 (không bắt buộc)")
     google_map_link = Column(String(255), nullable=True, comment="Link Google Maps tới địa chỉ")
     price = Column(Integer, nullable=False, comment="Giá trị (ví dụ: giá dịch vụ, sản phẩm)")
+    address = Column(String(255), nullable=True, comment="Địa chỉ thực tế của công ty/doanh nghiệp")
+    email = Column(String(100), nullable=True, comment="Email liên hệ")
