@@ -2,6 +2,7 @@ from sqlalchemy.orm import Session
 from app.database.models import CreditTransaction, TransactionType, User
 from fastapi import HTTPException
 from datetime import datetime
+from sqlalchemy import func
 
 def save_credit_transaction(
     db: Session, 
@@ -95,6 +96,68 @@ def get_credit_transactions(
     
     return {
         "total": total_count,
+        "limit": limit,
+        "offset": skip,
+        "items": transaction_list
+    }
+
+def get_revenue_credit_transactions(
+    db: Session,
+    skip: int = 0,
+    limit: int = 100,
+    start_date: datetime = None,
+    end_date: datetime = None,
+    sort_by_date: str = "desc"
+):
+    """
+    Lấy danh sách lịch sử giao dịch credits với transaction_type là purchase (doanh thu)
+    """
+    # Chỉ lấy giao dịch có transaction_type là purchase
+    query = db.query(CreditTransaction).filter(CreditTransaction.transaction_type == TransactionType.purchase)
+    
+    # Lọc theo ngày nếu có
+    if start_date:
+        query = query.filter(CreditTransaction.created_at >= start_date)
+    if end_date:
+        query = query.filter(CreditTransaction.created_at <= end_date)
+    
+    # Sắp xếp theo thời gian
+    if sort_by_date.lower() == "asc":
+        query = query.order_by(CreditTransaction.created_at.asc())
+    else:
+        query = query.order_by(CreditTransaction.created_at.desc())
+    
+    # Đếm tổng số bản ghi
+    total_count = query.count()
+    
+    # Tính tổng doanh thu
+    total_revenue = db.query(func.sum(CreditTransaction.amount)).filter(
+        CreditTransaction.transaction_type == TransactionType.purchase
+    ).scalar() or 0
+    
+    # Áp dụng phân trang
+    results = query.offset(skip).limit(limit).all()
+    
+    # Chuẩn bị dữ liệu trả về
+    transaction_list = []
+    for item in results:
+        # Truy vấn thông tin người dùng
+        user = db.query(User).filter(User.user_id == item.user_id).first()
+        username = user.username if user else f"User {item.user_id}"
+        
+        transaction_list.append({
+            "id": item.id,
+            "user_id": item.user_id,
+            "username": username,
+            "amount": float(item.amount),
+            "transaction_type": item.transaction_type.value,
+            "created_at": item.created_at.isoformat(),
+            "payment_method": item.payment_method
+        })
+    
+    return {
+        "total": total_count,
+        "total_revenue": float(total_revenue),
         "limit": limit,
         "offset": skip,
         "items": transaction_list

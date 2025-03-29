@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from app.database.connection import get_db
-from app.database.api.credit_api import save_credit_transaction, get_credit_transactions
+from app.database.api.credit_api import save_credit_transaction, get_credit_transactions, get_revenue_credit_transactions
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, Field
 from app.security.security import get_api_key
@@ -75,5 +75,33 @@ def get_credit_transactions_endpoint(
         start_date=start_date,
         end_date=end_date,
         transaction_type=transaction_type,
+        sort_by_date=sort_by_date
+    )
+
+@router.get("/revenue", summary="Lấy danh sách lịch sử giao dịch nạp tiền (doanh thu)")
+def get_revenue_transactions_endpoint(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    start_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None,
+    sort_by_date: str = Query("desc", regex="^(asc|desc)$"),
+    db: Session = Depends(get_db),
+    api_key: str = get_api_key
+):
+    """
+    Lấy danh sách tất cả lịch sử giao dịch nạp tiền (doanh thu) trong hệ thống
+    
+    - **skip**: Số bản ghi bỏ qua (để phân trang)
+    - **limit**: Số bản ghi tối đa trả về
+    - **start_date**: Lọc từ ngày (định dạng ISO)
+    - **end_date**: Lọc đến ngày (định dạng ISO)
+    - **sort_by_date**: Sắp xếp theo thời gian ("asc" hoặc "desc")
+    """
+    return get_revenue_credit_transactions(
+        db=db,
+        skip=skip,
+        limit=limit,
+        start_date=start_date,
+        end_date=end_date,
         sort_by_date=sort_by_date
     )
