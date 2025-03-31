@@ -170,7 +170,8 @@ def get_all_credit_transactions(
     sort_order: str = "desc",
     start_date: datetime = None,
     end_date: datetime = None,
-    transaction_type: str = None
+    transaction_type: str = None,
+    username: str = None
 ):
     """
     Lấy tất cả giao dịch credits trong hệ thống với nhiều tùy chọn lọc
@@ -190,6 +191,12 @@ def get_all_credit_transactions(
             query = query.filter(CreditTransaction.transaction_type == TransactionType.purchase)
         elif transaction_type.lower() == "usage":
             query = query.filter(CreditTransaction.transaction_type == TransactionType.usage)
+    
+    # Lọc theo tên người dùng nếu có
+    if username:
+        # Join với bảng User để tìm theo username
+        query = query.join(User, CreditTransaction.user_id == User.user_id)
+        query = query.filter(User.username.ilike(f"%{username}%"))
     
     # Đếm tổng số bản ghi
     total_count = query.count()

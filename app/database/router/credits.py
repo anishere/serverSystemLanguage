@@ -107,38 +107,42 @@ def get_revenue_transactions_endpoint(
     )
 
 @router.get("/all", summary="Lấy tất cả giao dịch credits trong hệ thống")
-def get_all_transactions_endpoint(
+def get_all_credit_transactions_endpoint(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=1000),
-    sort_order: str = Query("desc", regex="^(asc|desc)$"),
     start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
+    end_date: Optional[datetime] = None, 
     transaction_type: Optional[str] = Query(None, regex="^(purchase|usage|all)$"),
+    username: Optional[str] = None,
+    sort_by_date: str = Query("desc", regex="^(asc|desc)$"),
     db: Session = Depends(get_db),
     api_key: str = get_api_key
 ):
     """
-    Lấy tất cả giao dịch credits trong hệ thống.
+    Lấy tất cả lịch sử giao dịch credits với các tùy chọn lọc
     
-    - **skip**: Số bản ghi bỏ qua (phân trang)
-    - **limit**: Số bản ghi trả về tối đa (phân trang)
-    - **sort_order**: Thứ tự sắp xếp ("asc" hoặc "desc")
-    - **start_date**: Ngày bắt đầu (định dạng ISO)
-    - **end_date**: Ngày kết thúc (định dạng ISO)
-    - **transaction_type**: Loại giao dịch (purchase, usage, all)
+    - **skip**: Số bản ghi bỏ qua (để phân trang)
+    - **limit**: Số bản ghi tối đa trả về
+    - **start_date**: Lọc từ ngày (định dạng ISO)
+    - **end_date**: Lọc đến ngày (định dạng ISO)
+    - **transaction_type**: Lọc theo loại giao dịch ("purchase", "usage" hoặc "all")
+    - **username**: Tìm kiếm theo tên người dùng (không phân biệt hoa thường)
+    - **sort_by_date**: Sắp xếp theo thời gian ("asc" hoặc "desc")
     """
-    
     # Xử lý trường hợp transaction_type = 'all'
     if transaction_type == 'all':
         transaction_type = None
-    
-    # Lấy tất cả giao dịch
-    return get_all_credit_transactions(
+        
+    # Gọi hàm xử lý từ api
+    result = get_all_credit_transactions(
         db=db,
         skip=skip,
         limit=limit,
-        sort_order=sort_order,
         start_date=start_date,
         end_date=end_date,
-        transaction_type=transaction_type
+        transaction_type=transaction_type,
+        username=username,
+        sort_order=sort_by_date
     )
+    
+    return result
