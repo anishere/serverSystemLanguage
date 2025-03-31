@@ -19,15 +19,15 @@ translator_agent = TranslatorAgent(model_name="openai")
 @router.post("/translate", response_model=TranslateResponse)
 async def translate(request: TranslateRequest, api_key: str = get_api_key):
     """
-    API dịch văn bản từ ngôn ngữ A sang ngôn ngữ B.
+    API dịch văn bản từ ngôn ngữ A sang ngôn ngữ B với phong cách tùy chỉnh.
     """
     if not request.text or not request.src_lang or not request.tgt_lang:
         raise HTTPException(status_code=400, detail="Invalid input parameters")
 
     try:
         # Đóng gói thông tin dịch thuật vào câu hỏi theo format
-        # "TRANSLATE|src_lang|tgt_lang|text_to_translate"
-        formatted_question = f"TRANSLATE|{request.src_lang}|{request.tgt_lang}|{request.text}"
+        # "TRANSLATE|src_lang|tgt_lang|style|text_to_translate"
+        formatted_question = f"TRANSLATE|{request.src_lang}|{request.tgt_lang}|{request.style}|{request.text}"
         logger.info(f"Formatted question: {formatted_question}")
         
         # Gọi TranslatorAgent với câu hỏi đã định dạng

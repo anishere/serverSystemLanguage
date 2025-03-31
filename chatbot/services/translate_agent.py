@@ -23,21 +23,22 @@ class TranslatorAgent:
         """
         Dịch văn bản từ ngôn ngữ nguồn sang ngôn ngữ đích.
         """
-        # Phân tích câu hỏi để lấy text, src_lang, tgt_lang
-        # Format câu hỏi: "TRANSLATE|src_lang|tgt_lang|text_to_translate"
-        parts = state["question"].split("|", 3)
-        if len(parts) == 4 and parts[0] == "TRANSLATE":
+        # Phân tích câu hỏi để lấy text, src_lang, tgt_lang, style
+        # Format câu hỏi: "TRANSLATE|src_lang|tgt_lang|style|text_to_translate"
+        parts = state["question"].split("|", 4)
+        if len(parts) == 5 and parts[0] == "TRANSLATE":
             src_lang = parts[1]
             tgt_lang = parts[2]
-            text = parts[3]
+            style = parts[3]
+            text = parts[4]
             
-            # Thực hiện dịch thuật
-            translated_text = self.translator_generator.translate(text, src_lang, tgt_lang)
+            # Thực hiện dịch thuật với style
+            translated_text = self.translator_generator.translate(text, src_lang, tgt_lang, style)
             
             # Trả về theo cấu trúc của GraphState
             return {"generation": translated_text}
         else:
-            return {"generation": "Invalid translation format. Use: TRANSLATE|source_language|target_language|text"}
+            return {"generation": "Invalid translation format. Use: TRANSLATE|source_language|target_language|style|text"}
 
     def get_workflow(self):
         """

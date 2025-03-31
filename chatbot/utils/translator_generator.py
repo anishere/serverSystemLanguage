@@ -21,7 +21,7 @@ class TranslatorGenerator:
         prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", CustomPrompt.TRANSLATE_PROMPT),
-                ("human", "Translate this text from {src_lang} to {tgt_lang}: {text}")
+                ("human", "Translate this text from {src_lang} to {tgt_lang} with {style} style: {text}")
             ]
         )
 
@@ -34,12 +34,13 @@ class TranslatorGenerator:
         """
         return self.chain
         
-    def translate(self, text: str, src_lang: str, tgt_lang: str) -> str:
+    def translate(self, text: str, src_lang: str, tgt_lang: str, style: str = "General") -> str:
         """
-        Dịch văn bản từ ngôn ngữ nguồn sang ngôn ngữ đích.
+        Dịch văn bản từ ngôn ngữ nguồn sang ngôn ngữ đích với phong cách chỉ định.
         """
         return self.chain.invoke({
             "text": text,
             "src_lang": src_lang,
-            "tgt_lang": tgt_lang
+            "tgt_lang": tgt_lang,
+            "style": style
         })

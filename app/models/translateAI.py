@@ -6,6 +6,7 @@ class TranslateRequest(BaseModel):
     text: str
     src_lang: str
     tgt_lang: str
+    style: str = "General"
 
 # Mô hình dữ liệu đầu ra cho kết quả dịch
 class TranslateResponse(BaseModel):
