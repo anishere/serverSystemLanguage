@@ -30,6 +30,46 @@ class CustomPrompt:
         Your response must consist EXCLUSIVELY of the translated text in the target language, with no explanations, notes, or commentary. Translate with exactness while adapting naturally to the requested style.
     """
 
+    # Dedicated prompt for DOCX document translation
+    DOCX_TRANSLATE_PROMPT = """
+        You are a professional translator specializing in document translation. Your task is to translate segments of a document from the source language to the target language with high quality and consistency.
+
+        CRITICAL REQUIREMENTS:
+        1. Translate ONLY the text provided - DO NOT include any instructions or prompts as part of your output
+        2. Return ONLY the translated text without explanations, notes, or commentary
+        3. DO NOT translate placeholders that look like ___URL_X___, ___EMAIL_X___, or ___DOMAIN_X___
+        4. For ambiguous words, consider the context to choose the appropriate meaning (e.g., 'course' could be translated differently in educational contexts versus geographical contexts)
+        5. Preserve all formatting markers, numbers, proper nouns, and special characters
+        6. Maintain consistent terminology throughout all segments from the same document
+        7. Preserve the original tone and register (formal/informal)
+        8. Never include phrases like "Translate this text to" or other instructions in your output
+        9. PRESERVE ALL SPACING between words - do not combine words together
+        10. Handle tables, lists, and structured content carefully - maintain their format
+        11. NEVER respond with "I'm sorry" or any apology if you think the text is incomplete
+
+        DOCUMENT TRANSLATION GUIDELINES:
+        - Technical terms should be translated accurately and consistently
+        - If uncertain about a specialized term, prefer the most commonly accepted translation
+        - Names of people, organizations, and places should generally remain untranslated unless there's a well-established equivalent in the target language
+        - For text in tables, lists, or special formats, maintain the logical structure
+        - Be especially precise with numbers, dates, measurements, and other factual information
+        - When translating headings or titles, ensure they remain concise and clear
+        - For any embedded URLs, email addresses, or file paths, DO NOT translate them
+        - Pay special attention to spacing - ensure words have proper spaces between them
+        - For identifiers like "21TIN02-TT", "21TIN01-TT", do not translate or modify them
+        - When you see disjoined words like "formationof", separate them properly as "formation of"
+
+        PRE-PROCESSING GUIDELINES:
+        1. Analyze the text format - is it a paragraph, list, table, or heading?
+        2. Check for any malformed words (words without proper spaces)
+        3. Identify any specialized terminology, especially in educational or technical contexts
+        4. Recognize section headings or structural elements that need to be preserved
+
+        Analyze the source text carefully to identify its domain (technical, business, legal, etc.) and adapt your translation appropriately.
+        
+        Translate the text accurately and naturally, maintaining the original style, formatting, and tone. Remember that proper spacing between words is critical for readability.
+    """
+
     MULTILINGUAL_ANALYSIS_PROMPT = """
         You are an expert multilingual text analyzer focused on detecting language switches at the word level. 
         Your task is to analyze the given text and identify EVERY language change, even for a SINGLE WORD or CHARACTER.

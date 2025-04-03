@@ -237,17 +237,23 @@ class DocxTranslator:
         
         return count, tree
     
-    def _process_xml_files_parallel(self, xml_files: List[str]) -> Dict[str, Tuple[int, ET.ElementTree]]:
+    def _process_xml_files_parallel(self, xml_files: List[str], progress_callback: Optional[Callable[[int, int], None]] = None) -> Dict[str, Tuple[int, ET.ElementTree]]:
         """
         Xử lý song song nhiều file XML sử dụng ThreadPoolExecutor
         
+        Args:
+            xml_files: Danh sách các file XML cần xử lý
+            progress_callback: Hàm callback để báo cáo tiến trình
+            
         Returns:
             Dict[str, Tuple[int, ET.ElementTree]]: Từ điển ánh xạ đường dẫn file -> kết quả xử lý
         """
         results = {}
+        total_files = len(xml_files)
+        processed_files = 0
         
         # Tạo thanh tiến trình
-        pbar = tqdm(total=len(xml_files), desc="Xử lý các file XML")
+        pbar = tqdm(total=total_files, desc="Xử lý các file XML")
         
         with concurrent.futures.ThreadPoolExecutor(max_workers=self.max_workers) as executor:
             # Gửi các tác vụ xử lý file XML
@@ -272,16 +278,26 @@ class DocxTranslator:
                         # Nếu không thể đọc file, bỏ qua
                         pass
                 finally:
+                    processed_files += 1
                     pbar.update(1)
+                    
+                    # Gọi callback để cập nhật tiến trình
+                    if progress_callback:
+                        progress_callback(processed_files, total_files)
         
         pbar.close()
         return results
     
-    def translate_docx_complete(self, input_path, output_path):
+    def translate_docx_complete(self, input_path, output_path, progress_callback: Optional[Callable[[int, int], None]] = None):
         """
         Dịch DOCX với tối ưu hóa hiệu suất:
         - Xử lý song song nhiều file XML và phần tử trong mỗi file
         - Sử dụng cache để tránh dịch lại các đoạn trùng lặp
+        
+        Args:
+            input_path: Đường dẫn đến file DOCX cần dịch
+            output_path: Đường dẫn lưu file DOCX đã dịch
+            progress_callback: Hàm callback để báo cáo tiến trình
         """
         print(f"Đang xử lý đầy đủ file DOCX: {input_path}")
         start_time = time.time()
@@ -321,8 +337,12 @@ class DocxTranslator:
             
             print(f"Tìm thấy {len(xml_files)} file XML cần xử lý")
             
+            # Báo cáo tiến trình bắt đầu nếu có callback
+            if progress_callback:
+                progress_callback(0, len(xml_files))
+            
             # Xử lý song song tất cả các file XML
-            xml_results = self._process_xml_files_parallel(xml_files)
+            xml_results = self._process_xml_files_parallel(xml_files, progress_callback)
             
             # Tính tổng số đoạn văn bản đã xử lý
             total_texts = sum(count for count, _ in xml_results.values())
@@ -347,6 +367,10 @@ class DocxTranslator:
             elapsed_time = time.time() - start_time
             print(f"Đã lưu file DOCX với định dạng được giữ nguyên hoàn toàn: {output_path}")
             print(f"Thời gian xử lý: {elapsed_time:.2f} giây")
+            
+            # Báo cáo tiến trình hoàn thành nếu có callback
+            if progress_callback:
+                progress_callback(len(xml_files), len(xml_files))
             
             return output_path
             

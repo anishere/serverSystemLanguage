@@ -7,6 +7,7 @@ Format-Preserving Translator (Optimized Test)
 import os
 import time
 import argparse
+import re
 from pathlib import Path
 import json
 import requests
@@ -15,6 +16,11 @@ from urllib3.util.retry import Retry
 
 # Import module translator đã tối ưu
 from docx_translator import DocxTranslator
+
+# Các mẫu regex để phát hiện URL, email, và tên miền
+URL_PATTERN = re.compile(r'https?://(?:[-\w.]|(?:%[\da-fA-F]{2}))+(?:/[-\w%!$&\'()*+,;=:@/~]*)?(?:\?[-\w%!$&\'()*+,;=:@/~]*)?(?:#[-\w%!$&\'()*+,;=:@/~]*)?')
+EMAIL_PATTERN = re.compile(r'[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}')
+DOMAIN_PATTERN = re.compile(r'(?<!\w)(?:www\.)?[a-zA-Z0-9][-a-zA-Z0-9]*(?:\.[a-zA-Z0-9][-a-zA-Z0-9]*)+(?!\w)')
 
 def setup_openai_api(api_key, target_lang="en", model="gpt-4o-mini", temperature=0.3, request_timeout=60):
     """
@@ -34,6 +40,51 @@ def setup_openai_api(api_key, target_lang="en", model="gpt-4o-mini", temperature
     
     api_url = "https://api.openai.com/v1/chat/completions"
     
+    def preprocess_text(text):
+        """
+        Tiền xử lý văn bản để bảo vệ URLs, emails, và tên miền
+        Thay thế chúng bằng placeholders để tránh bị dịch
+        """
+        if not text or not text.strip():
+            return text, {}
+        
+        # Dictionary để lưu trữ ánh xạ giữa placeholders và giá trị thực
+        placeholders = {}
+        
+        # Hàm thay thế và lưu trữ trong dict
+        def replace_and_store(pattern, prefix):
+            nonlocal text, placeholders
+            
+            def replacer(match):
+                original = match.group(0)
+                placeholder = f"___{prefix}_{len(placeholders)}___"
+                placeholders[placeholder] = original
+                return placeholder
+            
+            text = pattern.sub(replacer, text)
+        
+        # Xử lý URLs
+        replace_and_store(URL_PATTERN, "URL")
+        # Xử lý emails
+        replace_and_store(EMAIL_PATTERN, "EMAIL")
+        # Xử lý tên miền
+        replace_and_store(DOMAIN_PATTERN, "DOMAIN")
+        
+        return text, placeholders
+    
+    def postprocess_text(text, placeholders):
+        """
+        Hậu xử lý văn bản để khôi phục URLs, emails, và tên miền từ placeholders
+        """
+        if not text or not placeholders:
+            return text
+        
+        # Thay thế các placeholders bằng giá trị thực
+        for placeholder, original in placeholders.items():
+            text = text.replace(placeholder, original)
+        
+        return text
+    
     def translate_text(text):
         """
         Dịch văn bản sử dụng OpenAI API
@@ -42,6 +93,9 @@ def setup_openai_api(api_key, target_lang="en", model="gpt-4o-mini", temperature
             return text
         
         try:
+            # Tiền xử lý để bảo vệ URLs, emails, và domains
+            processed_text, placeholders = preprocess_text(text)
+            
             headers = {
                 "Content-Type": "application/json",
                 "Authorization": f"Bearer {api_key}"
@@ -55,12 +109,14 @@ def setup_openai_api(api_key, target_lang="en", model="gpt-4o-mini", temperature
                         "You are a professional translator. Translate the given text "
                         f"to {target_lang} accurately and naturally. "
                         "Maintain the original style, formatting, and tone. "
+                        "DO NOT translate placeholders that look like ___URL_X___, ___EMAIL_X___, or ___DOMAIN_X___. "
+                        "For ambiguous words, consider the context to choose the appropriate meaning (e.g., 'course' could be translated differently in educational contexts versus geographical contexts). "
                         "Return ONLY the translated text without explanations or notes."
                     )
                 },
                 {
                     "role": "user",
-                    "content": f"Translate this text to {target_lang}:\n\n{text}"
+                    "content": f"Translate this text to {target_lang}:\n\n{processed_text}"
                 }
             ]
             
@@ -92,7 +148,10 @@ def setup_openai_api(api_key, target_lang="en", model="gpt-4o-mini", temperature
                 if any(error_msg in translated_text for error_msg in error_messages):
                     return text
                 
-                return translated_text
+                # Hậu xử lý để khôi phục URLs, emails và domains
+                final_text = postprocess_text(translated_text, placeholders)
+                
+                return final_text
             else:
                 print(f"Lỗi API: {response.status_code}")
                 if response.status_code == 429:

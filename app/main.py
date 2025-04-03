@@ -5,6 +5,7 @@ from app.routers import analyzeAI
 from app.routers import speechToTextAI
 from app.routers import textToSpeech
 from app.routers import imgToText
+from app.routers import docx_translate
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.database.router import users
@@ -39,6 +40,7 @@ app.include_router(analyzeAI.router)
 app.include_router(speechToTextAI.router)
 app.include_router(textToSpeech.router)
 app.include_router(imgToText.router)
+app.include_router(docx_translate.router)
 # app.include_router(imgToTextTranslate.router)
 
 app.include_router(users.router)
