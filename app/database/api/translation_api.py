@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.database.models import TranslationHistory, CreditTransaction, TransactionType, User
 from fastapi import HTTPException
 import math
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 
 def save_translation_history(
     db: Session, 
@@ -23,6 +23,10 @@ def save_translation_history(
         # Ước tính credits sử dụng (1 credit/100 ký tự)
         credits_used = max(1, math.ceil(character_count / 1))
         
+        # Tạo timezone UTC+7 (Vietnam)
+        vietnam_tz = timezone(timedelta(hours=7))
+        vietnam_time = datetime.now(vietnam_tz)
+        
         # Tạo bản ghi lịch sử dịch - TẠO ĐỐI TƯỢNG TranslationHistory thay vì gọi lại hàm
         translation_history = TranslationHistory(
             user_id=user_id,
@@ -30,8 +34,8 @@ def save_translation_history(
             output_text=output_text,
             source_language=source_language,
             target_language=target_language,
-            character_count=character_count,
-            credits_used=credits_used
+            credits_used=credits_used,
+            created_at=vietnam_time
         )
         
         db.add(translation_history)
