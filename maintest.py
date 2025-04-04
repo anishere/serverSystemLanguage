@@ -187,6 +187,8 @@ def main():
     parser.add_argument("--temperature", "-temp", type=float, default=0.3, help="Độ sáng tạo của mô hình (0.0-1.0)")
     parser.add_argument("--timeout", type=int, default=60, help="Thời gian chờ tối đa cho mỗi API request (giây)")
     parser.add_argument("--workers", "-w", type=int, default=4, help="Số lượng worker cho đa luồng")
+    parser.add_argument("--paragraph-mode", "-p", action="store_true", help="Dịch theo đoạn văn thay vì từng phần tử")
+    parser.add_argument("--log", "-l", action="store_true", help="Ghi log chi tiết về quá trình dịch")
     
     args = parser.parse_args()
     
@@ -218,16 +220,30 @@ def main():
         # Đảm bảo thư mục đích tồn tại
         output_path.parent.mkdir(parents=True, exist_ok=True)
         
+        # Thiết lập logging nếu cần
+        if args.log:
+            import logging
+            logging.basicConfig(
+                filename="translate_log.log",
+                level=logging.INFO,
+                format="%(asctime)s - %(levelname)s - %(message)s",
+                datefmt="%Y-%m-%d %H:%M:%S"
+            )
+            logging.info(f"Bắt đầu dịch file: {args.input_file}")
+            logging.info(f"Cấu hình: model={args.model}, target={args.target}, paragraph_mode={args.paragraph_mode}")
+        
+        # Đo thời gian thực hiện
+        start_time = time.time()
+        
         # Khởi tạo DocxTranslator với cấu hình đa luồng
+        print(f"Khởi tạo Translator với {args.workers} luồng")
+        if args.paragraph_mode:
+            print("Kích hoạt chế độ dịch theo đoạn văn")
+        
         translator = DocxTranslator(
             translate_func=translate_func,
             max_workers=args.workers
         )
-        
-        print(f"Khởi tạo Translator với {args.workers} luồng")
-        
-        # Đo thời gian thực hiện
-        start_time = time.time()
         
         # Dịch file
         output_file = translator.translate_docx_complete(args.input_file, output_path)
@@ -237,6 +253,14 @@ def main():
         if output_file:
             print(f"Đã hoàn thành trong {elapsed_time:.2f} giây!")
             print(f"File kết quả: {output_file}")
+            
+            # Ghi log kết quả phân tích nếu có
+            if args.log and hasattr(translator, 'document_analysis') and translator.document_analysis:
+                import logging
+                logging.info(f"Kết quả phân tích cấu trúc tài liệu: {translator.document_analysis}")
+                logging.info(f"Thời gian dịch: {elapsed_time:.2f} giây")
+                if hasattr(translator, 'cache') and hasattr(translator.cache, 'get_stats'):
+                    logging.info(f"Hiệu quả cache: {translator.cache.get_stats()}")
         else:
             print(f"Quá trình dịch không thành công sau {elapsed_time:.2f} giây.")
     
