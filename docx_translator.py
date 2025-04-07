@@ -14,12 +14,12 @@ import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
 import concurrent.futures
-from typing import List, Dict, Tuple, Callable, Optional, Any
+from typing import List, Dict, Tuple, Callable, Optional, Any, Set
 import hashlib
 from tqdm import tqdm
 import re
 
-# Namespace cho DOCX XML
+# Mở rộng NAMESPACES để hỗ trợ thêm các namespaces mới
 NAMESPACES = {
     'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main',
     'wp': 'http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing',
@@ -28,12 +28,26 @@ NAMESPACES = {
     'r': 'http://schemas.openxmlformats.org/officeDocument/2006/relationships',
     'm': 'http://schemas.openxmlformats.org/officeDocument/2006/math',
     'wps': 'http://schemas.microsoft.com/office/word/2010/wordprocessingShape',
+    'mc': 'http://schemas.openxmlformats.org/markup-compatibility/2006',
+    'v': 'urn:schemas-microsoft-com:vml',
+    'o': 'urn:schemas-microsoft-com:office:office',
+    'w14': 'http://schemas.microsoft.com/office/word/2010/wordml',
+    'w15': 'http://schemas.microsoft.com/office/word/2012/wordml',
 }
 
 # Đăng ký tất cả namespaces
 for prefix, uri in NAMESPACES.items():
     ET.register_namespace(prefix, uri)
 
+# Thêm trường hợp đặc biệt cần bảo vệ
+SPECIAL_TEXT_PATTERNS = [
+    re.compile(r'\d+(\.\d+)?'),  # Số (thập phân hoặc nguyên)
+    re.compile(r'^[ivxlcdm]+$', re.IGNORECASE),  # Số La Mã
+    re.compile(r'^[A-Z]\d+$'),  # Mã như A1, B2, C3
+    re.compile(r'^\d{4}-\d{2}-\d{2}$'),  # Định dạng ngày tháng ISO
+    re.compile(r'^(0?[1-9]|[12][0-9]|3[01])/(0?[1-9]|1[0-2])/\d{4}$'),  # dd/mm/yyyy
+    re.compile(r'^([A-Z][a-z]*\s?)+$'),  # Tên riêng
+]
 
 class TranslationCache:
     """
@@ -774,11 +788,173 @@ class DocxTranslator:
         
         return results
 
+    def _should_preserve_text(self, text: str) -> bool:
+        """
+        Kiểm tra xem văn bản có nên được giữ nguyên không dịch
+        
+        Args:
+            text: Văn bản cần kiểm tra
+            
+        Returns:
+            bool: True nếu nên giữ nguyên, False nếu nên dịch
+        """
+        if not text or not text.strip():
+            return True
+            
+        text = text.strip()
+        
+        # Kiểm tra các mẫu đặc biệt
+        for pattern in SPECIAL_TEXT_PATTERNS:
+            if pattern.match(text):
+                return True
+                
+        # Kiểm tra nếu văn bản quá ngắn
+        if len(text) <= 2 and not text.isalpha():
+            return True
+            
+        return False
+        
+    def _preserve_xml_structure(self, element: ET.Element) -> Dict[str, str]:
+        """
+        Bảo toàn cấu trúc XML của phần tử để khôi phục sau khi dịch
+        
+        Args:
+            element: Phần tử XML cần bảo toàn
+            
+        Returns:
+            Dict: Thông tin về cấu trúc XML
+        """
+        preserved = {
+            'tag': element.tag,
+            'attrib': {k: v for k, v in element.attrib.items()},
+            'tail': element.tail,
+        }
+        return preserved
+        
+    def _restore_xml_structure(self, element: ET.Element, preserved: Dict[str, str]) -> None:
+        """
+        Khôi phục cấu trúc XML của phần tử sau khi dịch
+        
+        Args:
+            element: Phần tử XML cần khôi phục
+            preserved: Thông tin về cấu trúc đã bảo toàn
+        """
+        for k, v in preserved['attrib'].items():
+            element.attrib[k] = v
+        element.tail = preserved['tail']
+    
+    def _process_docx_metadata(self, temp_dir: str) -> None:
+        """
+        Xử lý metadata của file DOCX để đảm bảo tính nhất quán
+        
+        Args:
+            temp_dir: Đường dẫn tới thư mục tạm chứa nội dung DOCX giải nén
+        """
+        # Xử lý core.xml để cập nhật thông tin về bản dịch
+        core_path = os.path.join(temp_dir, 'docProps', 'core.xml')
+        if os.path.exists(core_path):
+            try:
+                tree = ET.parse(core_path)
+                root = tree.getroot()
+                
+                # Tìm namespace của Core properties
+                cp_ns = '{http://schemas.openxmlformats.org/package/2006/metadata/core-properties}'
+                dc_ns = '{http://purl.org/dc/elements/1.1/}'
+                
+                # Cập nhật revision nếu có
+                revision_elem = root.find(f'.//{cp_ns}revision')
+                if revision_elem is not None:
+                    try:
+                        revision = int(revision_elem.text)
+                        revision_elem.text = str(revision + 1)
+                    except (ValueError, TypeError):
+                        revision_elem.text = "1"
+                
+                # Cập nhật lastModifiedBy
+                modified_by = root.find(f'.//{cp_ns}lastModifiedBy')
+                if modified_by is not None:
+                    modified_by.text = "DocxTranslator"
+                
+                # Cập nhật lastModified
+                from datetime import datetime
+                last_mod = root.find(f'.//{dc_ns}modified')
+                if last_mod is not None:
+                    last_mod.text = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+                
+                # Lưu lại file core.xml
+                tree.write(core_path, encoding='utf-8', xml_declaration=True)
+            except Exception as e:
+                print(f"Lỗi khi xử lý metadata: {e}")
+    
+    def _handle_complex_tables(self, xml_file: str) -> None:
+        """
+        Xử lý đặc biệt cho các bảng phức tạp
+        
+        Args:
+            xml_file: Đường dẫn tới file XML cần xử lý
+        """
+        try:
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
+            
+            # Tìm tất cả các bảng lồng nhau
+            nested_tables = []
+            tables = root.findall('.//w:tbl', NAMESPACES)
+            
+            for table in tables:
+                if table.find('.//w:tbl', NAMESPACES) is not None:
+                    nested_tables.append(table)
+            
+            if nested_tables:
+                print(f"Đã phát hiện {len(nested_tables)} bảng lồng nhau trong {os.path.basename(xml_file)}")
+                
+                # Đánh dấu các bảng lồng nhau để xử lý đặc biệt
+                for i, table in enumerate(nested_tables):
+                    # Thêm thuộc tính để đánh dấu là bảng lồng nhau
+                    table.set('docx_translator_nested', f'table_{i}')
+                
+                # Lưu lại file sau khi đánh dấu
+                tree.write(xml_file, encoding='utf-8', xml_declaration=True)
+        except Exception as e:
+            print(f"Lỗi khi xử lý bảng phức tạp: {e}")
+    
+    def _handle_special_elements(self, xml_file: str) -> None:
+        """
+        Xử lý các phần tử đặc biệt như dropcap, textbox, etc.
+        
+        Args:
+            xml_file: Đường dẫn tới file XML cần xử lý
+        """
+        try:
+            tree = ET.parse(xml_file)
+            root = tree.getroot()
+            
+            # Xử lý dropcaps
+            dropcaps = root.findall('.//*[@w:dropCap]', NAMESPACES)
+            if dropcaps:
+                print(f"Đã phát hiện {len(dropcaps)} dropcap trong {os.path.basename(xml_file)}")
+                for dropcap in dropcaps:
+                    # Đánh dấu dropcap để xử lý đặc biệt
+                    dropcap.set('docx_translator_special', 'dropcap')
+            
+            # Xử lý textbox và các phần tử vml
+            textboxes = root.findall('.//v:textbox', NAMESPACES)
+            if textboxes:
+                print(f"Đã phát hiện {len(textboxes)} textbox trong {os.path.basename(xml_file)}")
+                for textbox in textboxes:
+                    # Đánh dấu textbox để xử lý đặc biệt
+                    container = textbox.getparent()
+                    if container is not None:
+                        container.set('docx_translator_special', 'textbox')
+            
+            # Lưu lại file sau khi đánh dấu
+            tree.write(xml_file, encoding='utf-8', xml_declaration=True)
+        except Exception as e:
+            print(f"Lỗi khi xử lý phần tử đặc biệt: {e}")
+
     def translate_docx_complete(self, input_path, output_path, progress_callback: Optional[Callable[[int, int], None]] = None):
         """
-        Dịch DOCX với tối ưu hóa hiệu suất:
-        - Xử lý song song nhiều file XML và phần tử trong mỗi file
-        - Sử dụng cache để tránh dịch lại các đoạn trùng lặp
+        Dịch DOCX với tối ưu hóa hiệu suất và bảo toàn định dạng
         
         Args:
             input_path: Đường dẫn đến file DOCX cần dịch
@@ -796,7 +972,7 @@ class DocxTranslator:
             with zipfile.ZipFile(input_path, 'r') as zip_ref:
                 zip_ref.extractall(temp_dir)
             
-            # TẠO BẢN SAO TẠM TRƯỚC KHI XỬ LÝ
+            # Tạo bản sao tạm trước khi xử lý
             backup_dir = tempfile.mkdtemp()
             # Sao chép toàn bộ thư mục temp_dir sang backup_dir
             for item in os.listdir(temp_dir):
@@ -807,6 +983,9 @@ class DocxTranslator:
                 else:
                     shutil.copy2(s, d)
             
+            # Xử lý metadata của tài liệu
+            self._process_docx_metadata(temp_dir)
+            
             # Thu thập tất cả các file XML cần xử lý
             xml_files = []
             
@@ -815,32 +994,65 @@ class DocxTranslator:
             if os.path.exists(document_xml_path):
                 xml_files.append(document_xml_path)
                 
+                # Xử lý các phần tử đặc biệt và bảng phức tạp
+                self._handle_special_elements(document_xml_path)
+                self._handle_complex_tables(document_xml_path)
+                
                 # Phân tích cấu trúc tài liệu để thông tin
                 self.document_analysis = self._analyze_document_structure(document_xml_path)
                 num_paragraphs = self.document_analysis.get('num_paragraphs', 0)
                 avg_text_length = self.document_analysis.get('avg_text_length', 0.0)
                 print(f"Phân tích cấu trúc tài liệu: {num_paragraphs} đoạn, độ dài trung bình: {avg_text_length:.2f} ký tự.")
             
-            # Thêm các file header và footer
+            # Thêm các file XML khác cần dịch
             word_dir = os.path.join(temp_dir, 'word')
             if os.path.exists(word_dir):
+                # Headers và footers
                 for filename in os.listdir(word_dir):
                     if filename.startswith('header') or filename.startswith('footer'):
-                        xml_files.append(os.path.join(word_dir, filename))
+                        xml_path = os.path.join(word_dir, filename)
+                        xml_files.append(xml_path)
+                        self._handle_special_elements(xml_path)
+                
+                # Footnotes và endnotes
+                for special_file in ['footnotes.xml', 'endnotes.xml']:
+                    special_path = os.path.join(word_dir, special_file)
+                    if os.path.exists(special_path):
+                        xml_files.append(special_path)
+                        self._handle_special_elements(special_path)
             
-            # Thêm các file XML khác có thể chứa văn bản (footnotes, endnotes, etc.)
-            for dirpath, _, filenames in os.walk(word_dir):
-                for filename in filenames:
-                    if filename.endswith('.xml') and filename not in ['document.xml', 'styles.xml', 
-                                                                     'settings.xml', 'fontTable.xml', 
-                                                                     'webSettings.xml', 'theme1.xml']:
-                        xml_path = os.path.join(dirpath, filename)
-                        if xml_path not in xml_files:  # Tránh trùng lặp
-                            xml_files.append(xml_path)
+            # Xử lý các thuộc tính tài liệu trong docProps
+            doc_props_dir = os.path.join(temp_dir, 'docProps')
+            if os.path.exists(doc_props_dir):
+                # Cập nhật thông tin về tài liệu dịch trong app.xml
+                app_xml_path = os.path.join(doc_props_dir, 'app.xml')
+                if os.path.exists(app_xml_path):
+                    try:
+                        tree = ET.parse(app_xml_path)
+                        root = tree.getroot()
+                        
+                        # Tìm tất cả các phần tử văn bản chứa nội dung cần dịch
+                        text_elements = []
+                        for elem in root.iter():
+                            if elem.text and elem.text.strip() and not self._should_preserve_text(elem.text):
+                                text_elements.append(elem)
+                        
+                        # Dịch các phần tử văn bản tìm thấy
+                        if text_elements:
+                            print(f"Dịch {len(text_elements)} phần tử văn bản trong app.xml")
+                            for elem in text_elements:
+                                preserved = self._preserve_xml_structure(elem)
+                                elem.text = self.translate_text(elem.text)
+                                self._restore_xml_structure(elem, preserved)
+                            
+                            # Lưu lại file sau khi dịch
+                            tree.write(app_xml_path, encoding='utf-8', xml_declaration=True)
+                    except Exception as e:
+                        print(f"Lỗi khi xử lý app.xml: {e}")
             
             print(f"Tìm thấy {len(xml_files)} file XML cần xử lý")
             
-            # KIỂM TRA NẾU DOCX CHỈ CÓ 1 FILE XML (trường hợp đặc biệt)
+            # Kiểm tra nếu DOCX chỉ có 1 file XML (trường hợp đặc biệt)
             if len(xml_files) <= 1:
                 print("Phát hiện file DOCX đơn giản (chỉ có 1 file XML). Áp dụng phương pháp bảo toàn định dạng đặc biệt...")
                 
