@@ -1,0 +1,32 @@
+{
+  "id": "f10f7616-6edf-4bb3-9b89-cc4f9faaf902",
+  "status": "completed",
+  "progress": 100,
+  "started_at": 1744003377.5532217,
+  "updated_at": 1744003427.6528084,
+  "filename": "sample4_en_1744003377.docx",
+  "target_language": "en",
+  "model": "gpt-4o-mini",
+  "temperature": 0.0,
+  "workers": 2,
+  "message": "Dịch tài liệu hoàn tất",
+  "estimated_time_remaining": 0,
+  "document_analysis": {
+    "num_paragraphs": 206,
+    "num_text_elements": 211,
+    "num_runs": 530,
+    "avg_text_length": 23.89099526066351,
+    "special_paragraphs": 0,
+    "needs_text_grouping": true
+  },
+  "processing_details": {
+    "current_step": "completed",
+    "cache_stats": {
+      "hits": 22,
+      "misses": 118,
+      "total_requests": 140,
+      "hit_rate": 15.714285714285714,
+      "cache_size": 118
+    }
+  }
+}

@@ -2,7 +2,7 @@
 import os
 import sys
 import re
-from typing import Optional, Dict, Any, List, Tuple
+from typing import Optional, Dict, Any, List, Tuple, Callable
 from pathlib import Path
 import importlib.util
 import time
@@ -58,6 +58,35 @@ class DocxTranslatorGenerator:
         Trả về chuỗi pipeline xử lý để dịch văn bản.
         """
         return self.chain
+    
+    def generate_progress_bar(self, progress, width=50):
+        """
+        Tạo thanh tiến trình dạng unicode cho client
+        
+        Args:
+            progress: Giá trị phần trăm tiến trình (0-100)
+            width: Độ rộng của thanh tiến trình
+            
+        Returns:
+            Dict chứa thông tin về thanh tiến trình
+        """
+        # Đảm bảo giá trị progress hợp lệ
+        progress = max(0, min(100, progress))
+        
+        # Ký tự lấp đầy
+        fill_char = '█'
+        # Số lượng ký tự cần lấp đầy dựa trên tỷ lệ phần trăm
+        filled_length = int(width * progress // 100)
+        
+        # Tạo thanh tiến trình
+        bar = fill_char * filled_length + ' ' * (width - filled_length)
+        
+        # Tạo chuỗi hoàn chỉnh như terminal: 45%|████████████████████████████████                  | 45/100 [00:15<00:18,  3.03it/s]
+        return {
+            "progress_percent": progress,
+            "progress_bar": bar,
+            "progress_text": f"{progress}%|{bar}| {progress}/{100}"
+        }
     
     def preprocess_text(self, text: str) -> str:
         """
@@ -225,126 +254,17 @@ class DocxTranslatorGenerator:
         
         return final_result
 
-    def translate_docx(
-        self, 
-        input_path: str, 
-        output_path: str, 
-        target_lang: str, 
-        model: str = "gpt-4o-mini", 
-        temperature: float = 0.3, 
-        workers: int = 4,
-        api_key: Optional[str] = None,
-        status_file: Optional[str] = None  # Thêm tham số status_file để theo dõi tiến trình
-    ) -> str:
-        """
-        Dịch tài liệu DOCX từ ngôn ngữ nguồn sang ngôn ngữ đích.
-        
-        Args:
-            input_path: Đường dẫn đến tập tin DOCX cần dịch
-            output_path: Đường dẫn lưu tập tin DOCX đã dịch
-            target_lang: Mã ngôn ngữ đích (en, vi, zh, etc.)
-            model: Tên mô hình OpenAI để sử dụng
-            temperature: Thông số nhiệt độ cho mô hình dịch
-            workers: Số lượng worker cho xử lý đa luồng
-            api_key: OpenAI API key (sử dụng để khởi tạo hàm dịch)
-            status_file: Tệp JSON để lưu trạng thái tiến trình
-            
-        Returns:
-            str: Đường dẫn đến tập tin đã dịch
-        """
-        # Chuẩn bị paths
-        input_path = Path(input_path)
-        output_path = Path(output_path)
-        
-        # Tạo thư mục đích nếu cần
-        output_path.parent.mkdir(parents=True, exist_ok=True)
-        
-        # Khởi tạo trạng thái nếu status_file được cung cấp
-        if status_file:
-            status_data = {
-                "status": "started",
-                "progress": 0,
-                "started_at": time.time(),
-                "updated_at": time.time(),
-                "filename": output_path.name,
-                "target_language": target_lang,
-                "message": "Đang chuẩn bị dịch tài liệu...",
-                "estimated_time_remaining": None
-            }
-            self._update_status(status_file, status_data)
-        
-        # Tạo hàm callback để cập nhật trạng thái
-        def progress_callback(current, total):
-            if status_file:
-                progress_percent = min(99, int(current / total * 100)) if total > 0 else 0
-                elapsed_time = time.time() - status_data["started_at"]
-                
-                # Ước tính thời gian còn lại
-                if progress_percent > 0:
-                    time_per_percent = elapsed_time / progress_percent
-                    estimated_time_remaining = time_per_percent * (100 - progress_percent)
-                else:
-                    estimated_time_remaining = None
-                
-                status_data.update({
-                    "status": "processing",
-                    "progress": progress_percent,
-                    "updated_at": time.time(),
-                    "message": f"Đang dịch tài liệu... {progress_percent}%",
-                    "estimated_time_remaining": estimated_time_remaining
-                })
-                self._update_status(status_file, status_data)
-        
-        # Tạo hàm dịch văn bản sử dụng chain đã thiết lập
-        def translate_func(text):
-            if not text or not text.strip():
-                return text
-            return self.translate_text(text, target_lang)
-        
-        try:
-            # Khởi tạo DocxTranslator với cấu hình đa luồng
-            translator = DocxTranslator(
-                translate_func=translate_func,
-                max_workers=workers
-            )
-            
-            # Dịch file và trả về đường dẫn
-            result_path = translator.translate_docx_complete(
-                str(input_path),
-                str(output_path),
-                progress_callback=progress_callback  # Truyền hàm callback
-            )
-            
-            # Cập nhật trạng thái hoàn thành
-            if status_file:
-                status_data.update({
-                    "status": "completed",
-                    "progress": 100,
-                    "updated_at": time.time(),
-                    "message": "Dịch tài liệu hoàn tất",
-                    "estimated_time_remaining": 0
-                })
-                self._update_status(status_file, status_data)
-            
-            return result_path
-            
-        except Exception as e:
-            # Cập nhật trạng thái lỗi
-            if status_file:
-                status_data.update({
-                    "status": "error",
-                    "updated_at": time.time(),
-                    "message": f"Lỗi: {str(e)}",
-                    "error": str(e)
-                })
-                self._update_status(status_file, status_data)
-            
-            raise e
-
-    def _update_status(self, status_file: str, status_data: Dict[str, Any]) -> None:
+    def _update_status(self, status_file: Optional[str], status_data: Dict[str, Any]) -> None:
         """
         Cập nhật tệp trạng thái với thông tin tiến trình mới
+        
+        Args:
+            status_file: Đường dẫn đến tệp trạng thái
+            status_data: Thông tin trạng thái cần cập nhật
         """
+        if not status_file:
+            return
+            
         try:
             # Đọc dữ liệu hiện tại nếu tệp tồn tại
             if os.path.exists(status_file):
@@ -376,4 +296,240 @@ class DocxTranslatorGenerator:
             with open(status_file, 'w', encoding='utf-8') as f:
                 json.dump(status_data, f, ensure_ascii=False, indent=2)
         except Exception as e:
-            print(f"Lỗi khi cập nhật trạng thái: {e}") 
+            print(f"Lỗi khi cập nhật trạng thái: {e}")
+
+    def translate_docx(
+        self, 
+        input_path: str, 
+        output_path: str, 
+        target_lang: str, 
+        model: str = "gpt-4o-mini", 
+        temperature: float = 0.3, 
+        workers: int = 4,
+        api_key: Optional[str] = None,
+        status_file: Optional[str] = None,  # Thêm tham số status_file để theo dõi tiến trình
+        progress_callback: Optional[Callable[[int, int], None]] = None  # Thêm callback cho tiến trình
+    ) -> str:
+        """
+        Dịch tài liệu DOCX từ ngôn ngữ nguồn sang ngôn ngữ đích.
+        
+        Args:
+            input_path: Đường dẫn đến tập tin DOCX cần dịch
+            output_path: Đường dẫn lưu tập tin DOCX đã dịch
+            target_lang: Mã ngôn ngữ đích (en, vi, zh, etc.)
+            model: Tên mô hình OpenAI để sử dụng
+            temperature: Thông số nhiệt độ cho mô hình dịch
+            workers: Số lượng worker cho xử lý đa luồng
+            api_key: OpenAI API key (sử dụng để khởi tạo hàm dịch)
+            status_file: Tệp JSON để lưu trạng thái tiến trình
+            progress_callback: Hàm callback để theo dõi tiến trình
+            
+        Returns:
+            str: Đường dẫn đến tập tin đã dịch
+        """
+        # Chuẩn bị paths
+        input_path = Path(input_path)
+        output_path = Path(output_path)
+        
+        # Tạo thư mục đích nếu cần
+        output_path.parent.mkdir(parents=True, exist_ok=True)
+        
+        # Khởi tạo trạng thái nếu status_file được cung cấp
+        start_time = time.time()
+        if status_file:
+            status_data = {
+                "status": "started",
+                "progress": 0,
+                "started_at": start_time,
+                "updated_at": start_time,
+                "filename": output_path.name,
+                "target_language": target_lang,
+                "message": "Đang chuẩn bị dịch tài liệu...",
+                "estimated_time_remaining": None,
+                "progress_display": {
+                    "progress_bar": self.generate_progress_bar(0),
+                    "stage_info": "Khởi tạo",
+                    "current_item": "Đang chuẩn bị",
+                    "elapsed_time_str": "00:00:00",
+                    "eta_str": "--:--:--",
+                    "terminal_style": "0%|                                                  | 0/? [00:00<?, ?it/s]"
+                }
+            }
+            self._update_status(status_file, status_data)
+        
+        # Tạo hàm callback kết hợp để cập nhật trạng thái và gọi progress_callback nếu có
+        def combined_progress_callback(current, total):
+            # Cập nhật trạng thái
+            if status_file:
+                progress_percent = min(99, int(current / total * 100)) if total > 0 else 0
+                elapsed_time = time.time() - start_time
+                
+                # Định dạng thời gian đã trôi qua
+                elapsed_mins, elapsed_secs = divmod(int(elapsed_time), 60)
+                elapsed_hrs, elapsed_mins = divmod(elapsed_mins, 60)
+                elapsed_time_str = f"{elapsed_hrs:02d}:{elapsed_mins:02d}:{elapsed_secs:02d}"
+                
+                # Ước tính thời gian còn lại
+                if progress_percent > 0:
+                    time_per_percent = elapsed_time / progress_percent
+                    estimated_time_remaining = time_per_percent * (100 - progress_percent)
+                    
+                    # Định dạng thời gian còn lại
+                    eta_mins, eta_secs = divmod(int(estimated_time_remaining), 60)
+                    eta_hrs, eta_mins = divmod(eta_mins, 60)
+                    eta_str = f"{eta_hrs:02d}:{eta_mins:02d}:{eta_secs:02d}"
+                    
+                    # Tính tốc độ xử lý
+                    items_per_second = current / elapsed_time if elapsed_time > 0 else 0
+                else:
+                    estimated_time_remaining = None
+                    eta_str = "--:--:--"
+                    items_per_second = 0
+                
+                # Tạo thanh tiến trình kiểu terminal
+                terminal_style = f"{progress_percent}%|{'█' * (progress_percent // 2)}{' ' * (50 - progress_percent // 2)}| {current}/{total} [{elapsed_time_str}<{eta_str}, {items_per_second:.2f}it/s]"
+                
+                update_data = {
+                    "status": "processing",
+                    "progress": progress_percent,
+                    "updated_at": time.time(),
+                    "message": f"Đang dịch tài liệu... {progress_percent}%",
+                    "estimated_time_remaining": estimated_time_remaining,
+                    "processing_details": {
+                        "current_step": "translating",
+                        "processed_paragraphs": current,
+                        "total_paragraphs": total
+                    },
+                    "progress_display": {
+                        "progress_bar": self.generate_progress_bar(progress_percent),
+                        "stage_info": "Dịch văn bản",
+                        "current_item": f"{current}/{total} đoạn",
+                        "elapsed_time_str": elapsed_time_str,
+                        "eta_str": eta_str,
+                        "speed": f"{items_per_second:.2f} đoạn/giây",
+                        "terminal_style": terminal_style
+                    }
+                }
+                self._update_status(status_file, update_data)
+            
+            # Gọi callback ban đầu nếu có
+            if progress_callback:
+                progress_callback(current, total)
+        
+        try:
+            # Cập nhật trạng thái phân tích tài liệu
+            if status_file:
+                self._update_status(status_file, {
+                    "status": "analyzing",
+                    "message": "Đang phân tích cấu trúc tài liệu...",
+                    "processing_details": {
+                        "current_step": "analyzing"
+                    },
+                    "progress_display": {
+                        "progress_bar": self.generate_progress_bar(0),
+                        "stage_info": "Phân tích cấu trúc",
+                        "current_item": "Đang quét tài liệu",
+                        "elapsed_time_str": "00:00:00",
+                        "eta_str": "--:--:--",
+                        "terminal_style": "Phân tích cấu trúc tài liệu..."
+                    }
+                })
+            
+            # Tạo hàm dịch văn bản sử dụng chain đã thiết lập
+            def translate_func(text):
+                if not text or not text.strip():
+                    return text
+                return self.translate_text(text, target_lang)
+            
+            # Khởi tạo DocxTranslator với cấu hình đa luồng
+            translator = DocxTranslator(
+                translate_func=translate_func,
+                max_workers=workers
+            )
+            
+            # Dịch file và trả về đường dẫn
+            result_path = translator.translate_docx_complete(
+                str(input_path),
+                str(output_path),
+                progress_callback=combined_progress_callback  # Truyền hàm callback kết hợp
+            )
+            
+            # Lấy thông tin phân tích tài liệu từ translator
+            document_analysis = {}
+            if hasattr(translator, 'document_analysis') and translator.document_analysis:
+                document_analysis = translator.document_analysis
+                
+            # Lấy thông tin về cache
+            cache_stats = {}
+            if hasattr(translator, 'cache') and hasattr(translator.cache, 'get_stats'):
+                cache_stats = translator.cache.get_stats()
+            
+            # Tính thời gian đã trôi qua
+            elapsed_time = time.time() - start_time
+            elapsed_mins, elapsed_secs = divmod(int(elapsed_time), 60)
+            elapsed_hrs, elapsed_mins = divmod(elapsed_mins, 60)
+            elapsed_time_str = f"{elapsed_hrs:02d}:{elapsed_mins:02d}:{elapsed_secs:02d}"
+            
+            # Tạo thanh tiến trình hoàn thành 100%
+            terminal_style = f"100%|{'█' * 50}| Hoàn thành [{elapsed_time_str}, Xong!]"
+            
+            # Cập nhật trạng thái hoàn thành với thông tin phân tích
+            if status_file:
+                final_status = {
+                    "status": "completed",
+                    "progress": 100,
+                    "updated_at": time.time(),
+                    "message": "Dịch tài liệu hoàn tất",
+                    "estimated_time_remaining": 0,
+                    "document_analysis": document_analysis,
+                    "processing_details": {
+                        "current_step": "completed",
+                        "cache_stats": cache_stats
+                    },
+                    "progress_display": {
+                        "progress_bar": self.generate_progress_bar(100),
+                        "stage_info": "Hoàn thành",
+                        "current_item": "Xong",
+                        "elapsed_time_str": elapsed_time_str,
+                        "eta_str": "00:00:00",
+                        "speed": "",
+                        "terminal_style": terminal_style
+                    }
+                }
+                self._update_status(status_file, final_status)
+            
+            return result_path
+            
+        except Exception as e:
+            # Tính thời gian đã trôi qua khi xảy ra lỗi
+            elapsed_time = time.time() - start_time
+            elapsed_mins, elapsed_secs = divmod(int(elapsed_time), 60)
+            elapsed_hrs, elapsed_mins = divmod(elapsed_mins, 60)
+            elapsed_time_str = f"{elapsed_hrs:02d}:{elapsed_mins:02d}:{elapsed_secs:02d}"
+            
+            # Tạo thông tin hiển thị lỗi kiểu terminal
+            terminal_style = f"Lỗi sau [{elapsed_time_str}]: {str(e)}"
+            
+            # Cập nhật trạng thái lỗi
+            if status_file:
+                error_status = {
+                    "status": "error",
+                    "updated_at": time.time(),
+                    "message": f"Lỗi: {str(e)}",
+                    "error": str(e),
+                    "error_details": {
+                        "type": type(e).__name__,
+                        "traceback": str(e)
+                    },
+                    "progress_display": {
+                        "progress_bar": self.generate_progress_bar(0),
+                        "stage_info": "Lỗi",
+                        "current_item": "",
+                        "elapsed_time_str": elapsed_time_str,
+                        "eta_str": "--:--:--",
+                        "terminal_style": terminal_style
+                    }
+                }
+                self._update_status(status_file, error_status)
+            
+            raise e 

@@ -1,0 +1,43 @@
+{
+  "id": "80caf5f4-2a51-4625-af5c-4c9dbf4e0a5b",
+  "status": "completed",
+  "progress": 100,
+  "started_at": 1744004186.1274424,
+  "updated_at": 1744004212.6248407,
+  "filename": "sample4_en_1744004186.docx",
+  "target_language": "en",
+  "model": "gpt-4o-mini",
+  "temperature": 0.0,
+  "workers": 4,
+  "message": "Dịch tài liệu hoàn tất",
+  "estimated_time_remaining": 0,
+  "document_analysis": {
+    "num_paragraphs": 206,
+    "num_text_elements": 211,
+    "num_runs": 530,
+    "avg_text_length": 23.89099526066351,
+    "special_paragraphs": 0,
+    "needs_text_grouping": true
+  },
+  "processing_details": {
+    "current_step": "completed",
+    "cache_stats": {
+      "hits": 20,
+      "misses": 120,
+      "total_requests": 140,
+      "hit_rate": 14.285714285714285,
+      "cache_size": 118
+    }
+  },
+  "progress_display": {
+    "progress_bar": {
+      "progress_percent": 100,
+      "progress_bar": "████████████████████████████████████████████████████████████████████████████████████████████████████",
+      "progress_text": "100%|████████████████████████████████████████████████████████████████████████████████████████████████████| 100/100"
+    },
+    "stage_info": "Hoàn thành",
+    "elapsed_time_str": "00:00:26",
+    "eta_str": "00:00",
+    "terminal_style": "100%|██████████████████████████████████████████████████| Hoàn thành [00:00:26, Xong!]"
+  }
+}
