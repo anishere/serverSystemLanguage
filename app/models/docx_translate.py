@@ -1,19 +1,5 @@
 from pydantic import BaseModel
-from enum import Enum
 from typing import Optional, Dict, Any, List
-
-
-class SupportedLanguage(str, Enum):
-    """Supported languages for document translation"""
-    ENGLISH = "en"
-    VIETNAMESE = "vi"
-    CHINESE = "zh"
-    SPANISH = "es"
-    FRENCH = "fr"
-    GERMAN = "de"
-    JAPANESE = "ja"
-    KOREAN = "ko"
-    RUSSIAN = "ru"
 
 
 class DocumentAnalysis(BaseModel):
@@ -70,7 +56,8 @@ class TranslationStatus(BaseModel):
 
 class DocxTranslationRequest(BaseModel):
     """Request model for DOCX file translation"""
-    target_language: SupportedLanguage
+    target_language: str
+    style: Optional[str] = "General"
     model: Optional[str] = "gpt-4o-mini"
     temperature: Optional[float] = 0.3
     workers: Optional[int] = 4

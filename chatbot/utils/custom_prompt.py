@@ -47,6 +47,21 @@ class CustomPrompt:
         10. Handle tables, lists, and structured content carefully - maintain their format
         11. NEVER respond with "I'm sorry" or any apology if you think the text is incomplete
 
+        TRANSLATION STYLES:
+        - General: Neutral, everyday language suitable for general content. Balance clarity with natural expression without being overly formal or casual. Use common vocabulary and straightforward sentence structures.
+        
+        - Professional: Formal, polished language appropriate for business, corporate, and professional settings. Use precise terminology, avoid colloquialisms, maintain a respectful tone. Prefer third-person perspective, use formal address forms, and employ business-specific vocabulary when relevant.
+        
+        - Technology: Technical language for IT, software, hardware, and digital contexts. Preserve technical terminology accurately, maintain technical precision, and use industry-standard terms. Do not simplify technical concepts, maintain exact technical meaning, and use domain-appropriate formatting for code, commands, or technical parameters.
+        
+        - Medical: Professional medical terminology suitable for healthcare contexts. Use precise anatomical, pharmaceutical, and procedural terms while maintaining sensitivity. Preserve exact medical meaning, use standardized medical abbreviations correctly, and maintain the appropriate level of formality based on whether content is for healthcare providers or patients.
+        
+        - Finance: Formal financial language with correct economic and financial terminology. Preserve numerical information with absolute accuracy and use terms appropriate for banking, investment, accounting, or economic contexts. Maintain precision with financial concepts, use standardized financial terminology, and ensure exact numerical equivalence.
+        
+        - Education: Clear, instructional language suitable for educational materials. Adapt to appropriate academic level, preserve pedagogical elements, and maintain educational tone. Use vocabulary appropriate to the educational level, preserve academic formatting, and maintain teaching tools like examples, explanations, and questioning methods.
+        
+        - Legal: Precise legal terminology with formal structure. Maintain legal accuracy with careful attention to nuance, preserve exact meaning of technical legal terms, and use jurisdiction-appropriate terminology. Keep exact meanings of rights, obligations, and conditions, preserve legal document structure, and maintain appropriate formality level.
+
         DOCUMENT TRANSLATION GUIDELINES:
         - Technical terms should be translated accurately and consistently
         - If uncertain about a specialized term, prefer the most commonly accepted translation
@@ -65,9 +80,9 @@ class CustomPrompt:
         3. Identify any specialized terminology, especially in educational or technical contexts
         4. Recognize section headings or structural elements that need to be preserved
 
-        Analyze the source text carefully to identify its domain (technical, business, legal, etc.) and adapt your translation appropriately.
+        Analyze the source text carefully to identify its domain (technical, business, legal, etc.) and adapt your translation appropriately based on the specified style.
         
-        Translate the text accurately and naturally, maintaining the original style, formatting, and tone. Remember that proper spacing between words is critical for readability.
+        Translate the text accurately and naturally, maintaining the original formatting and tone, while adapting to the specified style. Remember that proper spacing between words is critical for readability.
     """
 
     MULTILINGUAL_ANALYSIS_PROMPT = """

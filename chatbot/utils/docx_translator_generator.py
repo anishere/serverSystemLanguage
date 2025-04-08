@@ -46,7 +46,7 @@ class DocxTranslatorGenerator:
         prompt = ChatPromptTemplate.from_messages(
             [
                 ("system", CustomPrompt.DOCX_TRANSLATE_PROMPT),
-                ("human", "Here is the text to translate to {target_lang}:\n\n{text}")
+                ("human", "Here is the text to translate to {target_lang} with {style} style:\n\n{text}")
             ]
         )
 
@@ -209,7 +209,7 @@ class DocxTranslatorGenerator:
         
         return text
     
-    def translate_text(self, text: str, target_lang: str = "en") -> str:
+    def translate_text(self, text: str, target_lang: str = "en", style: str = "General") -> str:
         """
         Dịch một đoạn văn bản sử dụng chain đã được thiết lập.
         Bảo vệ URLs, email, website khỏi bị dịch.
@@ -232,7 +232,8 @@ class DocxTranslatorGenerator:
         # 3. Dịch văn bản đã xử lý, giữ nguyên placeholder
         result = self.chain.invoke({
             "text": processed_text,
-            "target_lang": target_lang
+            "target_lang": target_lang,
+            "style": style
         })
         
         # 4. Kiểm tra và loại bỏ các cụm không mong muốn
@@ -308,7 +309,8 @@ class DocxTranslatorGenerator:
         workers: int = 4,
         api_key: Optional[str] = None,
         status_file: Optional[str] = None,  # Thêm tham số status_file để theo dõi tiến trình
-        progress_callback: Optional[Callable[[int, int], None]] = None  # Thêm callback cho tiến trình
+        progress_callback: Optional[Callable[[int, int], None]] = None,  # Thêm callback cho tiến trình
+        style: str = "General"  # Thêm tham số style
     ) -> str:
         """
         Dịch tài liệu DOCX từ ngôn ngữ nguồn sang ngôn ngữ đích.
@@ -323,6 +325,7 @@ class DocxTranslatorGenerator:
             api_key: OpenAI API key (sử dụng để khởi tạo hàm dịch)
             status_file: Tệp JSON để lưu trạng thái tiến trình
             progress_callback: Hàm callback để theo dõi tiến trình
+            style: Kiểu dịch (General, Professional, Technology, Medical, v.v.)
             
         Returns:
             str: Đường dẫn đến tập tin đã dịch
@@ -344,6 +347,9 @@ class DocxTranslatorGenerator:
                 "updated_at": start_time,
                 "filename": output_path.name,
                 "target_language": target_lang,
+                "style": style,
+                "model": model,
+                "temperature": temperature,
                 "message": "Đang chuẩn bị dịch tài liệu...",
                 "estimated_time_remaining": None,
                 "progress_display": {
@@ -439,7 +445,7 @@ class DocxTranslatorGenerator:
             def translate_func(text):
                 if not text or not text.strip():
                     return text
-                return self.translate_text(text, target_lang)
+                return self.translate_text(text, target_lang, style)
             
             # Khởi tạo DocxTranslator với cấu hình đa luồng
             translator = DocxTranslator(

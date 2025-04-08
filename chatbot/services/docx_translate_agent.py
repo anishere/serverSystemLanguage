@@ -107,7 +107,7 @@ class DocxTranslatorAgent:
         Dịch tài liệu DOCX từ ngôn ngữ nguồn sang ngôn ngữ đích.
         """
         # Phân tích thông tin từ state
-        # Format: "TRANSLATE_DOCX|input_path|output_path|target_lang|model|temperature|workers|status_file"
+        # Format: "TRANSLATE_DOCX|input_path|output_path|target_lang|model|temperature|workers|status_file|style"
         parts = state["question"].split("|")
         if len(parts) >= 4 and parts[0] == "TRANSLATE_DOCX":
             input_path = parts[1]
@@ -119,6 +119,7 @@ class DocxTranslatorAgent:
             temperature = float(parts[5]) if len(parts) > 5 else 0.3
             workers = int(parts[6]) if len(parts) > 6 else 4
             status_file = parts[7] if len(parts) > 7 else None
+            style = parts[8] if len(parts) > 8 else "General"
             
             # Kiểm tra tệp tồn tại
             if not os.path.exists(input_path):
@@ -244,7 +245,8 @@ class DocxTranslatorAgent:
                     temperature=temperature,
                     workers=workers,
                     status_file=status_file,  # Truyền đường dẫn tới file status
-                    progress_callback=progress_callback  # Truyền hàm callback
+                    progress_callback=progress_callback,  # Truyền hàm callback
+                    style=style  # Thêm thông số style
                 )
                 
                 # Tính toán thời gian đã trôi qua
@@ -308,7 +310,7 @@ class DocxTranslatorAgent:
                 
                 return {"generation": f"ERROR|{error_message}"}
         else:
-            error_message = "Định dạng không hợp lệ. Sử dụng: TRANSLATE_DOCX|input_path|output_path|target_lang|model|temperature|workers|status_file"
+            error_message = "Định dạng không hợp lệ. Sử dụng: TRANSLATE_DOCX|input_path|output_path|target_lang|model|temperature|workers|status_file|style"
             return {"generation": f"ERROR|{error_message}"}
 
     def get_workflow(self):

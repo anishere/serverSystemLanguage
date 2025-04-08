@@ -6,7 +6,7 @@ from typing import Optional
 from fastapi import APIRouter, UploadFile, File, Form, HTTPException, BackgroundTasks, Request, Depends, Security
 from fastapi.responses import FileResponse, JSONResponse
 from app.security.security import get_api_key
-from app.models.docx_translate import DocxTranslationRequest, DocxTranslationResponse, SupportedLanguage
+from app.models.docx_translate import DocxTranslationRequest, DocxTranslationResponse
 from app.config import settings
 import logging
 import uuid
@@ -267,7 +267,8 @@ async def translate_docx(
     background_tasks: BackgroundTasks,
     request: Request,
     file: UploadFile = File(...),
-    target_language: SupportedLanguage = Form(...),
+    target_language: str = Form(...),
+    style: Optional[str] = Form("General"),
     model: Optional[str] = Form("gpt-4o-mini"),
     temperature: Optional[float] = Form(0.3),
     workers: Optional[int] = Form(4),
@@ -311,6 +312,7 @@ async def translate_docx(
                 "updated_at": time.time(),
                 "filename": output_file_path.name,
                 "target_language": target_language,
+                "style": style,
                 "model": model,
                 "temperature": temperature,
                 "workers": workers,
@@ -407,8 +409,8 @@ async def translate_docx(
             
             # Cách 1: Sử dụng docx_translator_agent
             # Đóng gói thông tin dịch thuật vào câu hỏi theo format
-            # "TRANSLATE_DOCX|input_path|output_path|target_lang|model|temperature|workers|status_file"
-            formatted_question = f"TRANSLATE_DOCX|{input_file_path}|{output_file_path}|{target_language}|{model}|{temperature}|{workers}|{status_file_path}"
+            # "TRANSLATE_DOCX|input_path|output_path|target_lang|model|temperature|workers|status_file|style"
+            formatted_question = f"TRANSLATE_DOCX|{input_file_path}|{output_file_path}|{target_language}|{model}|{temperature}|{workers}|{status_file_path}|{style}"
             logger.info(f"Formatted question: {formatted_question}")
             
             # Gọi DocxTranslatorAgent với câu hỏi đã định dạng
@@ -582,11 +584,4 @@ async def download_translated_document(filename: str):
         path=file_path,
         filename=filename,
         media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
-    )
-
-@router.get("/languages")
-async def get_supported_languages():
-    """
-    Lấy danh sách các ngôn ngữ được hỗ trợ
-    """
-    return {lang.name: lang.value for lang in SupportedLanguage} 
+    ) 
