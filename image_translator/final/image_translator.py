@@ -39,23 +39,183 @@ from dotenv import load_dotenv
 # Tải biến môi trường
 load_dotenv()
 
+# Bảng chuyển đổi từ mã ISO sang mã OCR của EasyOCR
+ISO_TO_OCR_CODE = {
+    'abq': 'abq',  # Abaza
+    'ady': 'ady',  # Adyghe
+    'af': 'af',    # Afrikaans
+    'ang': 'ang',  # Angika
+    'ar': 'ar',    # Arabic
+    'as': 'as',    # Assamese
+    'ava': 'ava',  # Avar
+    'az': 'az',    # Azerbaijani
+    'be': 'be',    # Belarusian
+    'bg': 'bg',    # Bulgarian
+    'bh': 'bh',    # Bihari
+    'bho': 'bho',  # Bhojpuri
+    'bn': 'bn',    # Bengali
+    'bs': 'bs',    # Bosnian
+    'zh': 'ch_sim',  # Simplified Chinese
+    'zh_tw': 'ch_tra',  # Traditional Chinese
+    'che': 'che',  # Chechen
+    'cs': 'cs',    # Czech
+    'cy': 'cy',    # Welsh
+    'da': 'da',    # Danish
+    'dar': 'dar',  # Dargwa
+    'de': 'de',    # German
+    'en': 'en',    # English
+    'es': 'es',    # Spanish
+    'et': 'et',    # Estonian
+    'fa': 'fa',    # Persian (Farsi)
+    'fr': 'fr',    # French
+    'ga': 'ga',    # Irish
+    'gom': 'gom',  # Goan Konkani
+    'hi': 'hi',    # Hindi
+    'hr': 'hr',    # Croatian
+    'hu': 'hu',    # Hungarian
+    'id': 'id',    # Indonesian
+    'inh': 'inh',  # Ingush
+    'is': 'is',    # Icelandic
+    'it': 'it',    # Italian
+    'ja': 'ja',    # Japanese
+    'kbd': 'kbd',  # Kabardian
+    'kn': 'kn',    # Kannada
+    'ko': 'ko',    # Korean
+    'ku': 'ku',    # Kurdish
+    'la': 'la',    # Latin
+    'lbe': 'lbe',  # Lak
+    'lez': 'lez',  # Lezghian
+    'lt': 'lt',    # Lithuanian
+    'lv': 'lv',    # Latvian
+    'mah': 'mah',  # Magahi
+    'mai': 'mai',  # Maithili
+    'mi': 'mi',    # Maori
+    'mn': 'mn',    # Mongolian
+    'mr': 'mr',    # Marathi
+    'ms': 'ms',    # Malay
+    'mt': 'mt',    # Maltese
+    'ne': 'ne',    # Nepali
+    'new': 'new',  # Newari
+    'nl': 'nl',    # Dutch
+    'no': 'no',    # Norwegian
+    'oc': 'oc',    # Occitan
+    'pi': 'pi',    # Pali
+    'pl': 'pl',    # Polish
+    'pt': 'pt',    # Portuguese
+    'ro': 'ro',    # Romanian
+    'ru': 'ru',    # Russian
+    'rs': 'rs_cyrillic',  # Serbian (cyrillic)
+    'rs_lat': 'rs_latin',  # Serbian (latin)
+    'sck': 'sck',  # Nagpuri
+    'sk': 'sk',    # Slovak
+    'sl': 'sl',    # Slovenian
+    'sq': 'sq',    # Albanian
+    'sv': 'sv',    # Swedish
+    'sw': 'sw',    # Swahili
+    'ta': 'ta',    # Tamil
+    'tab': 'tab',  # Tabassaran
+    'te': 'te',    # Telugu
+    'th': 'th',    # Thai
+    'tjk': 'tjk',  # Tajik
+    'tl': 'tl',    # Tagalog
+    'tr': 'tr',    # Turkish
+    'ug': 'ug',    # Uyghur
+    'uk': 'uk',    # Ukranian
+    'ur': 'ur',    # Urdu
+    'uz': 'uz',    # Uzbek
+    'vi': 'vi'     # Vietnamese
+}
+
 # Bảng chuyển đổi từ tên ngôn ngữ đầy đủ sang mã OCR
 LANGUAGE_TO_OCR_CODE = {
-    'Vietnamese': 'vi',
-    'English': 'en',
-    'Chinese': 'ch',
-    'Chinese Traditional': 'ch_tra',
-    'Japanese': 'ja',
-    'Korean': 'ko',
-    'French': 'fr',
-    'German': 'de',
-    'Italian': 'it',
-    'Spanish': 'es',
-    'Portuguese': 'pt',
-    'Russian': 'ru',
+    'Abaza': 'abq',
+    'Adyghe': 'ady',
+    'Afrikaans': 'af',
+    'Angika': 'ang',
     'Arabic': 'ar',
+    'Assamese': 'as',
+    'Avar': 'ava',
+    'Azerbaijani': 'az',
+    'Belarusian': 'be',
+    'Bulgarian': 'bg',
+    'Bihari': 'bh',
+    'Bhojpuri': 'bho',
+    'Bengali': 'bn',
+    'Bosnian': 'bs',
+    'Chinese': 'ch_sim',
+    'Chinese Simplified': 'ch_sim',
+    'Simplified Chinese': 'ch_sim',
+    'Chinese Traditional': 'ch_tra',
+    'Traditional Chinese': 'ch_tra',
+    'Chechen': 'che',
+    'Czech': 'cs',
+    'Welsh': 'cy',
+    'Danish': 'da',
+    'Dargwa': 'dar',
+    'German': 'de',
+    'English': 'en',
+    'Spanish': 'es',
+    'Estonian': 'et',
+    'Persian': 'fa',
+    'Farsi': 'fa',
+    'French': 'fr',
+    'Irish': 'ga',
+    'Goan Konkani': 'gom',
     'Hindi': 'hi',
-    'Thai': 'th'
+    'Croatian': 'hr',
+    'Hungarian': 'hu',
+    'Indonesian': 'id',
+    'Ingush': 'inh',
+    'Icelandic': 'is',
+    'Italian': 'it',
+    'Japanese': 'ja',
+    'Kabardian': 'kbd',
+    'Kannada': 'kn',
+    'Korean': 'ko',
+    'Kurdish': 'ku',
+    'Latin': 'la',
+    'Lak': 'lbe',
+    'Lezghian': 'lez',
+    'Lithuanian': 'lt',
+    'Latvian': 'lv',
+    'Magahi': 'mah',
+    'Maithili': 'mai',
+    'Maori': 'mi',
+    'Mongolian': 'mn',
+    'Marathi': 'mr',
+    'Malay': 'ms',
+    'Maltese': 'mt',
+    'Nepali': 'ne',
+    'Newari': 'new',
+    'Dutch': 'nl',
+    'Norwegian': 'no',
+    'Occitan': 'oc',
+    'Pali': 'pi',
+    'Polish': 'pl',
+    'Portuguese': 'pt',
+    'Romanian': 'ro',
+    'Russian': 'ru',
+    'Serbian': 'rs_cyrillic',
+    'Serbian Cyrillic': 'rs_cyrillic',
+    'Serbian Latin': 'rs_latin',
+    'Nagpuri': 'sck',
+    'Slovak': 'sk',
+    'Slovenian': 'sl',
+    'Albanian': 'sq',
+    'Swedish': 'sv',
+    'Swahili': 'sw',
+    'Tamil': 'ta',
+    'Tabassaran': 'tab',
+    'Telugu': 'te',
+    'Thai': 'th',
+    'Tajik': 'tjk',
+    'Tagalog': 'tl',
+    'Turkish': 'tr',
+    'Uyghur': 'ug',
+    'Ukrainian': 'uk',
+    'Urdu': 'ur',
+    'Uzbek': 'uz',
+    'Vietnamese': 'vi'
 }
 
 # Phần 1: Đọc ảnh và phát hiện ngôn ngữ
@@ -102,7 +262,7 @@ def detect_language_from_image(image_path, api_key):
         api_key: OpenAI API key
         
     Returns:
-        tuple: (language_code, language_name) - mã ngôn ngữ ISO 639-1 và tên đầy đủ
+        tuple: (language_code, language_name, ocr_code) - mã ngôn ngữ ISO, tên đầy đủ và mã cho OCR
     """
     print(f"Đang nhận dạng ngôn ngữ từ ảnh: {image_path}")
     
@@ -170,18 +330,21 @@ def detect_language_from_image(image_path, api_key):
         # Parse JSON
         language_info = json.loads(response_content)
         
-        # Lấy mã ngôn ngữ và tên đầy đủ
+        # Lấy mã ngôn ngữ ISO và tên đầy đủ
         language_code = language_info.get('code', 'en')
         language_name = language_info.get('name', 'English')
         
-        print(f"Ngôn ngữ được nhận dạng: {language_name} ({language_code})")
+        # Chuyển đổi mã ISO sang mã OCR cho EasyOCR
+        ocr_code = ISO_TO_OCR_CODE.get(language_code, 'en')
         
-        return language_code, language_name
+        print(f"Ngôn ngữ được nhận dạng: {language_name} ({language_code}) - Mã OCR: {ocr_code}")
+        
+        return language_code, language_name, ocr_code
     
     except Exception as e:
         print(f"Lỗi khi nhận dạng ngôn ngữ: {e}")
         # Mặc định là tiếng Anh nếu có lỗi
-        return "en", "English"
+        return "en", "English", "en"
 
 # Phần 2: Phát hiện vùng văn bản sử dụng EasyOCR
 
@@ -220,6 +383,19 @@ def detect_text_with_easyocr(image_path, lang='en'):
     
     try:
         import easyocr
+        
+        # Kiểm tra ngôn ngữ có được hỗ trợ không
+        supported_langs = ['abq', 'ady', 'af', 'ang', 'ar', 'as', 'ava', 'az', 'be', 'bg', 'bh', 'bho', 'bn', 'bs', 
+                          'ch_sim', 'ch_tra', 'che', 'cs', 'cy', 'da', 'dar', 'de', 'en', 'es', 'et', 'fa', 'fr', 
+                          'ga', 'gom', 'hi', 'hr', 'hu', 'id', 'inh', 'is', 'it', 'ja', 'kbd', 'kn', 'ko', 'ku', 
+                          'la', 'lbe', 'lez', 'lt', 'lv', 'mah', 'mai', 'mi', 'mn', 'mr', 'ms', 'mt', 'ne', 'new', 
+                          'nl', 'no', 'oc', 'pi', 'pl', 'pt', 'ro', 'ru', 'rs_cyrillic', 'rs_latin', 'sck', 'sk', 
+                          'sl', 'sq', 'sv', 'sw', 'ta', 'tab', 'te', 'th', 'tjk', 'tl', 'tr', 'ug', 'uk', 'ur', 
+                          'uz', 'vi']
+        
+        if lang not in supported_langs:
+            print(f"Cảnh báo: Ngôn ngữ '{lang}' không được EasyOCR hỗ trợ. Sử dụng tiếng Anh làm ngôn ngữ mặc định.")
+            lang = 'en'
         
         # Xác định ngôn ngữ
         languages = [lang]
@@ -617,27 +793,36 @@ def crop_text_areas(image, text_areas, output_dir):
 
 def whiten_text_areas(image, text_areas):
     """
-    Tô trắng vùng chữ trong ảnh gốc.
+    Làm mờ vùng chữ trong ảnh gốc thay vì tô trắng.
     
     Args:
         image: Ảnh gốc
         text_areas: Danh sách vùng văn bản
         
     Returns:
-        Ảnh sau khi tô trắng các vùng văn bản
+        Ảnh sau khi làm mờ các vùng văn bản
     """
     # Tạo bản sao của ảnh
-    whitened_image = image.copy()
+    result_image = image.copy()
+    # Tạo mask để lưu các vùng văn bản
+    mask = np.zeros(image.shape[:2], dtype=np.uint8)
     
-    # Tô trắng từng vùng văn bản
+    # Tô trắng từng vùng văn bản trên mask
     for box, _, _ in text_areas:
         # Chuyển đổi box thành dạng số nguyên
         points = np.array(box, dtype=np.int32).reshape((-1, 1, 2))
-        
-        # Tô trắng vùng đa giác
-        cv2.fillPoly(whitened_image, [points], (255, 255, 255))
+        # Tô trắng vùng đa giác trên mask
+        cv2.fillPoly(mask, [points], 255)
     
-    return whitened_image
+    # Tạo ảnh làm mờ từ ảnh gốc
+    # Mức độ làm mờ (kernel size) tùy thuộc vào kích thước ảnh
+    blur_intensity = 15  # Có thể điều chỉnh tùy theo yêu cầu
+    blurred_image = cv2.GaussianBlur(image, (blur_intensity, blur_intensity), 0)
+    
+    # Chỉ áp dụng làm mờ cho các vùng văn bản
+    result_image = np.where(mask[:, :, np.newaxis] == 255, blurred_image, result_image)
+    
+    return result_image
 
 # Phần 4: Tiền xử lý ảnh
 
@@ -841,6 +1026,7 @@ def extract_text_with_gpt(image_path, api_key):
         - Keep numbers, dates, and special characters exactly as they appear
         - Do not add any explanations, interpretations or commentary
         - Do not describe the image itself
+        - If no text is visible in the image, simply return EMPTY
         
         Your output should ONLY contain the extracted text, presented as clearly as possible.
         """
@@ -869,6 +1055,30 @@ def extract_text_with_gpt(image_path, api_key):
         
         # Lấy văn bản
         extracted_text = result['choices'][0]['message']['content'].strip()
+        
+        # Kiểm tra nếu GPT trả về là không có văn bản hoặc phản hồi giải thích không mong muốn
+        if extracted_text.upper() == "EMPTY" or "no text" in extracted_text.lower() or "i don't see any text" in extracted_text.lower():
+            print("Không phát hiện văn bản trong ảnh")
+            return ""
+            
+        # Loại bỏ các phần giải thích không mong muốn
+        unwanted_phrases = [
+            "I don't see any text",
+            "There is no text",
+            "No text is visible",
+            "The image does not contain",
+            "The image shows",
+            "This image contains",
+            "The image appears to",
+            "There appears to be no",
+            "I cannot identify any"
+        ]
+        
+        # Nếu văn bản bắt đầu bằng một trong những cụm từ không mong muốn, trả về rỗng
+        for phrase in unwanted_phrases:
+            if extracted_text.startswith(phrase):
+                print(f"Phát hiện giải thích không mong muốn: '{extracted_text}'")
+                return ""
         
         print(f"Văn bản đã trích xuất: {extracted_text}")
         
@@ -1139,7 +1349,7 @@ def get_text_dimensions(text, font_path, font_size):
         # Ước tính kích thước dựa trên số ký tự
         return (len(text) * font_size // 2, font_size)
 
-def find_optimal_font_size(text, max_width, max_height, font_path, min_size=8, max_size=100):
+def find_optimal_font_size(text, max_width, max_height, font_path, min_size=12, max_size=120):
     """
     Tìm kích thước font tối ưu để văn bản vừa vặn với kích thước cho trước.
     
@@ -1158,7 +1368,7 @@ def find_optimal_font_size(text, max_width, max_height, font_path, min_size=8, m
         return min_size
     
     # Thêm biên an toàn để tránh cắt chữ
-    safety_margin = 0.98  # Giảm kích thước tối đa xuống % để tạo biên an toàn
+    safety_margin = 0.95  # Giảm kích thước tối đa xuống % để tạo biên an toàn
     max_width_with_margin = max_width * safety_margin
     max_height_with_margin = max_height * safety_margin
     
@@ -1185,11 +1395,13 @@ def find_optimal_font_size(text, max_width, max_height, font_path, min_size=8, m
         optimal_size -= 1
         width, height = get_text_dimensions(text, font_path, optimal_size)
     
-    # Giảm thêm 1 kích thước để đảm bảo an toàn
-    if optimal_size > min_size:
-        optimal_size -= 1
+    # Chỉ giảm để đảm bảo an toàn nếu cần thiết
+    if width > max_width_with_margin * 0.98 or height > max_height_with_margin * 0.98:
+        if optimal_size > min_size:
+            optimal_size -= 1
     
-    return optimal_size
+    # Chọn kích thước font không nhỏ hơn mức tối thiểu
+    return max(optimal_size, min_size)
 
 def hex_to_rgb(hex_color):
     """
@@ -1245,9 +1457,10 @@ def get_color(color_str):
     # Mặc định là màu đen
     return (0, 0, 0)
 
-def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', text_color='black'):
+def draw_text_on_image(image, text, font_path, font_size=30, bg_color='white', text_color='black', blur_intensity=15, text_opacity=180):
     """
     Vẽ văn bản lên ảnh với nền có màu, đảm bảo văn bản không bị cắt.
+    Nếu không có văn bản, trả về ảnh làm mờ thay vì ảnh màu trắng.
     
     Args:
         image: Ảnh OpenCV (numpy array)
@@ -1256,10 +1469,24 @@ def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', t
         font_size: Kích thước font (nếu = 0, tự động xác định)
         bg_color: Màu nền
         text_color: Màu chữ
+        blur_intensity: Độ mờ của nền (5-25)
+        text_opacity: Độ đục của nền văn bản (0-255)
         
     Returns:
         Ảnh đã vẽ văn bản
     """
+    # Đảm bảo blur_intensity là số lẻ và trong khoảng hợp lệ
+    blur_intensity = max(5, min(25, blur_intensity))
+    if blur_intensity % 2 == 0:
+        blur_intensity += 1
+        
+    # Đảm bảo text_opacity trong khoảng hợp lệ
+    text_opacity = max(50, min(255, text_opacity))
+    
+    # Kiểm tra nếu không có văn bản, trả về ảnh làm mờ
+    if not text.strip():
+        return cv2.GaussianBlur(image, (blur_intensity, blur_intensity), 0)
+    
     # Chuyển đổi ảnh OpenCV sang PIL
     image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
     pil_image = Image.fromarray(image_rgb)
@@ -1270,16 +1497,19 @@ def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', t
     # Nếu font_size = 0, tự động xác định kích thước font tối ưu
     if font_size <= 0:
         if font_path:
-            font_size = find_optimal_font_size(text, width, height, font_path, min_size=8)
+            font_size = find_optimal_font_size(text, width, height, font_path, min_size=16)
+            # Tăng kích thước font thêm 40% để đảm bảo chữ to hơn
+            font_size = int(font_size * 1.4)
         else:
-            font_size = 12  # Kích thước mặc định nhỏ
+            font_size = 24  # Kích thước mặc định lớn hơn
     
-    # Tạo ảnh mới với màu nền
-    bg_color_rgb = get_color(bg_color)
-    new_image = Image.new('RGB', (width, height), bg_color_rgb)
+    # Làm mờ ảnh nền thay vì sử dụng màu nền trơn
+    blurred_background = cv2.GaussianBlur(image, (blur_intensity, blur_intensity), 0)
+    blurred_background_rgb = cv2.cvtColor(blurred_background, cv2.COLOR_BGR2RGB)
+    blurred_pil = Image.fromarray(blurred_background_rgb)
     
     # Tạo đối tượng vẽ
-    draw = ImageDraw.Draw(new_image)
+    draw = ImageDraw.Draw(blurred_pil)
     
     # Chuẩn bị font
     try:
@@ -1295,10 +1525,10 @@ def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', t
     text_width, text_height = get_text_dimensions(text, font_path, font_size)
     
     # Chỉ giảm kích thước font khi văn bản thực sự lớn hơn bounding box
-    if text_width > width*0.95 or text_height > height*0.95:
-        # Giảm kích thước font để đảm bảo vừa vặn
-        scaling_factor = min(width*0.95/text_width, height*0.95/text_height)
-        new_font_size = max(8, int(font_size * scaling_factor))
+    if text_width > width or text_height > height:
+        # Giảm kích thước font để đảm bảo vừa vặn, thêm hệ số an toàn 0.98 để đảm bảo không bị cắt chữ
+        scaling_factor = min(width/text_width, height/text_height) * 0.98
+        new_font_size = max(12, int(font_size * scaling_factor))
         
         # Thông báo về việc giảm kích thước font
         print(f"Văn bản quá dài cho bounding box: giảm font size từ {font_size} xuống {new_font_size}")
@@ -1309,6 +1539,14 @@ def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', t
             font_size = new_font_size
             # Tính lại kích thước văn bản
             text_width, text_height = get_text_dimensions(text, font_path, font_size)
+            
+            # Kiểm tra lại nếu vẫn quá lớn, giảm thêm 5%
+            if text_width > width or text_height > height:
+                new_font_size = max(10, int(new_font_size * 0.95))
+                print(f"Vẫn còn quá lớn, giảm thêm xuống {new_font_size}")
+                font = ImageFont.truetype(font_path, new_font_size)
+                font_size = new_font_size
+                text_width, text_height = get_text_dimensions(text, font_path, font_size)
         except Exception:
             pass
     else:
@@ -1317,6 +1555,15 @@ def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', t
     # Căn giữa văn bản
     lines = text.split('\n')
     y_offset = (height - text_height) // 2
+    
+    # Tạo một layer bán trong suốt màu trắng để làm nền cho chữ
+    overlay = Image.new('RGBA', (width, height), (255, 255, 255, text_opacity))
+    blurred_pil = blurred_pil.convert('RGBA')
+    blurred_pil = Image.alpha_composite(blurred_pil, overlay.convert('RGBA'))
+    blurred_pil = blurred_pil.convert('RGB')  # Chuyển lại về RGB để vẽ văn bản
+    
+    # Tạo đối tượng vẽ mới sau khi đã composite
+    draw = ImageDraw.Draw(blurred_pil)
     
     for line in lines:
         if not line.strip():  # Dòng trống
@@ -1334,12 +1581,12 @@ def draw_text_on_image(image, text, font_path, font_size=20, bg_color='white', t
         y_offset += line_height + int(font_size * 0.2)  # Thêm khoảng cách giữa các dòng
     
     # Chuyển đổi trở lại ảnh OpenCV
-    result_image = np.array(new_image)
+    result_image = np.array(blurred_pil)
     result_image = cv2.cvtColor(result_image, cv2.COLOR_RGB2BGR)
     
     return result_image
 
-def process_translated_images(translated_texts, crop_dir, output_dir, bg_color, text_color, font_size):
+def process_translated_images(translated_texts, crop_dir, output_dir, bg_color, text_color, font_size, blur_intensity=15, text_opacity=180, font_scale=1.4):
     """
     Xử lý các ảnh để vẽ văn bản đã dịch.
     
@@ -1350,6 +1597,9 @@ def process_translated_images(translated_texts, crop_dir, output_dir, bg_color, 
         bg_color: Màu nền
         text_color: Màu chữ
         font_size: Kích thước font (0 = tự động)
+        blur_intensity: Độ mờ của nền
+        text_opacity: Độ đục của nền văn bản
+        font_scale: Hệ số tỷ lệ tăng kích thước font
         
     Returns:
         Danh sách thông tin các ảnh đã xử lý
@@ -1382,19 +1632,49 @@ def process_translated_images(translated_texts, crop_dir, output_dir, bg_color, 
         
         # Lấy văn bản đã dịch
         translated_text = item.get('translated_text', '')
+        extracted_text = item.get('extracted_text', '')
         
+        # Kiểm tra xem có văn bản trích xuất được không
+        if not extracted_text.strip():
+            print(f"Ảnh #{item['index']} không có văn bản trích xuất, sử dụng ảnh làm mờ")
+            # Đánh dấu không có văn bản để bỏ qua vùng này khi chèn vào ảnh gốc
+            item['has_text'] = False
+            
+            # Làm mờ ảnh và lưu
+            blurred_image = cv2.GaussianBlur(image, (blur_intensity, blur_intensity), 0)
+            
+            # Tạo đường dẫn đầu ra
+            output_path = os.path.join(output_dir, f"translated_{item['index']}.jpg")
+            
+            # Lưu ảnh kết quả
+            cv2.imwrite(output_path, blurred_image)
+            print(f"Đã lưu ảnh đã làm mờ vào: {output_path}")
+            
+            # Lưu thông tin
+            processed_info = item.copy()
+            processed_info['output_path'] = output_path
+            processed_images.append(processed_info)
+            continue
+            
         # Nếu không có văn bản đã dịch, sử dụng văn bản gốc
         if not translated_text:
-            translated_text = item.get('extracted_text', item.get('text', ''))
+            translated_text = extracted_text
+        
+        # Đánh dấu có văn bản
+        item['has_text'] = True
         
         # Xác định kích thước font
-        if font_size <= 0 and font_path:
+        current_font_size = font_size
+        if current_font_size <= 0 and font_path:
             # Tự động xác định kích thước font
             height, width = image.shape[:2]
-            font_size = find_optimal_font_size(translated_text, width, height, font_path)
+            # Tăng kích thước tối thiểu
+            font_size = find_optimal_font_size(translated_text, width, height, font_path, min_size=16)
+            # Tăng thêm font size mặc định lên 40% để đảm bảo chữ to đủ đọc
+            font_size = int(font_size * 1.4)
         elif font_size <= 0:
             # Nếu không có font, sử dụng kích thước mặc định
-            font_size = 20
+            font_size = 25
         
         # Vẽ văn bản lên ảnh
         result_image = draw_text_on_image(image, translated_text, font_path, font_size, bg_color, text_color)
@@ -1414,13 +1694,14 @@ def process_translated_images(translated_texts, crop_dir, output_dir, bg_color, 
     # Lưu thông tin các ảnh đã xử lý
     translated_info_path = os.path.join(output_dir, "translated_info.txt")
     with open(translated_info_path, 'w', encoding='utf-8') as f:
-        f.write("INDEX|PATH|OUTPUT_PATH|EXTRACTED_TEXT|TRANSLATED_TEXT\n")
+        f.write("INDEX|PATH|OUTPUT_PATH|EXTRACTED_TEXT|TRANSLATED_TEXT|HAS_TEXT\n")
         for info in processed_images:
             crop_path = info.get('path', info.get('crop_path', ''))
             output_path = info['output_path']
             extracted_text = info.get('extracted_text', '')
             translated_text = info.get('translated_text', '')
-            f.write(f"{info['index']}|{crop_path}|{output_path}|{extracted_text}|{translated_text}\n")
+            has_text = 'true' if info.get('has_text', True) else 'false'
+            f.write(f"{info['index']}|{crop_path}|{output_path}|{extracted_text}|{translated_text}|{has_text}\n")
     
     print(f"Đã lưu thông tin các ảnh đã xử lý vào: {translated_info_path}")
     
@@ -1487,6 +1768,11 @@ def merge_translated_regions(original_image, translated_info, cropped_info=None)
         for item in translated_info:
             idx = item['index']
             
+            # Kiểm tra nếu vùng này không có văn bản, bỏ qua việc chèn
+            if item.get('has_text') is False:
+                print(f"Vùng #{idx} không có văn bản, bỏ qua việc chèn")
+                continue
+            
             # Lấy thông tin về vùng đã cắt
             if idx in crop_map:
                 crop_item = crop_map[idx]
@@ -1511,6 +1797,11 @@ def merge_translated_regions(original_image, translated_info, cropped_info=None)
     else:
         # Không có thông tin crop, dựa vào tên file để xác định vị trí chèn
         for item in translated_info:
+            # Kiểm tra nếu vùng này không có văn bản, bỏ qua việc chèn
+            if item.get('has_text') is False:
+                print(f"Vùng #{item['index']} không có văn bản, bỏ qua việc chèn")
+                continue
+                
             # Trích xuất thông tin từ tên file
             basename = os.path.basename(item['crop_path'])
             if basename.startswith('crop_') and '_' in basename:
@@ -1618,6 +1909,9 @@ def parse_args():
     parser.add_argument('--bg_color', default='white', help='Màu nền cho văn bản dịch')
     parser.add_argument('--text_color', default='black', help='Màu chữ cho văn bản dịch')
     parser.add_argument('--show', action='store_true', help='Hiển thị kết quả')
+    parser.add_argument('--blur_intensity', type=int, default=15, help='Độ mờ khi làm mờ background (5-25, càng cao càng mờ)')
+    parser.add_argument('--text_opacity', type=int, default=180, help='Độ đục của nền văn bản (0-255, càng cao càng đục)')
+    parser.add_argument('--font_scale', type=float, default=1.4, help='Hệ số tỷ lệ tăng kích thước font (1.0-2.0)')
     return parser.parse_args()
 
 def main():
@@ -1656,26 +1950,28 @@ def main():
     # Nhận dạng ngôn ngữ nguồn nếu không được cung cấp
     if not args.source_lang:
         print("\n----- Phát hiện ngôn ngữ nguồn -----")
-        source_lang_code, source_lang_name = detect_language_from_image(args.image_path, api_key)
+        source_lang_code, source_lang_name, source_lang_ocr_code = detect_language_from_image(args.image_path, api_key)
     else:
         # Nếu đã cung cấp nguồn ngữ, chuyển đổi về dạng phù hợp
         if args.source_lang in LANGUAGE_TO_OCR_CODE:
             # Nếu là tên đầy đủ
             source_lang_name = args.source_lang
             source_lang_code = LANGUAGE_TO_OCR_CODE[args.source_lang]
+            source_lang_ocr_code = LANGUAGE_TO_OCR_CODE[args.source_lang]
         else:
             # Nếu là mã ngôn ngữ
             source_lang_code = args.source_lang
             # Tìm tên đầy đủ (nếu có)
             source_lang_name = next((name for name, code in LANGUAGE_TO_OCR_CODE.items() 
                                 if code == source_lang_code), source_lang_code)
+            source_lang_ocr_code = ISO_TO_OCR_CODE.get(source_lang_code, 'en')
         
-        print(f"Sử dụng ngôn ngữ nguồn: {source_lang_name} ({source_lang_code})")
+        print(f"Sử dụng ngôn ngữ nguồn: {source_lang_name} ({source_lang_code}) - Mã OCR: {source_lang_ocr_code}")
     
     # Bước 2: Phát hiện vùng văn bản (sử dụng OCR)
     print("\n----- Bước 2: Phát hiện vùng văn bản -----")
     # Sử dụng mã ngôn ngữ cho OCR
-    text_areas = detect_text_areas(args.image_path, source_lang_code, args.use_fallback)
+    text_areas = detect_text_areas(args.image_path, source_lang_ocr_code, args.use_fallback)
     
     # Hợp nhất các bounding box gần nhau nếu được yêu cầu
     if args.merge_boxes:
@@ -1690,11 +1986,12 @@ def main():
     save_detected_boxes_image(args.image_path, text_areas, paths["detected_boxes"])
     
     # Bước 3: Cắt vùng bounding box và tô trắng
-    print("\n----- Bước 3: Cắt vùng bounding box và tô trắng -----")
+    print("\n----- Bước 3: Cắt vùng bounding box và làm mờ -----")
     # Cắt vùng văn bản
     cropped_images = crop_text_areas(image, text_areas, paths["crops_dir"])
     
-    # Tô trắng vùng văn bản
+    # Làm mờ vùng văn bản (không còn tô trắng)
+    blur_intensity = args.blur_intensity
     whitened_image = whiten_text_areas(image, text_areas)
     cv2.imwrite(paths["whitened_image"], whitened_image)
     
@@ -1723,7 +2020,10 @@ def main():
         paths["translated_dir"],
         args.bg_color,
         args.text_color,
-        0  # Kích thước font tự động
+        0,  # Kích thước font tự động
+        args.blur_intensity,
+        args.text_opacity,
+        args.font_scale
     )
     
     # Bước 8: Chèn vùng đã xử lý vào ảnh gốc
